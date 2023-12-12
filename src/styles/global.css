@@ -1,0 +1,13 @@
+.white-bg{
+    background-color: white !important;
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+}
+.disabled {
+    outline: 0 !important;
+    cursor: not-allowed !important;
+    pointer-events: auto !important;
+}
