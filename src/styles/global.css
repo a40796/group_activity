@@ -11,3 +11,12 @@
     cursor: not-allowed !important;
     pointer-events: auto !important;
 }
+
+.datePicker .dp__disabled {
+    background: none;
+    border: none;
+  }
+
+  .datePicker .dp__input{
+    border: none;
+  }

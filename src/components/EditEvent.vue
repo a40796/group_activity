@@ -34,19 +34,20 @@
         <div class="container p-0 mt-3">
           <div class="form-group">
             <label for="exampleSelect" class="form-label">Number of Participants:</label>
-            <select
-              class="form-control white-bg numberSelect"
+            <input
+              type="range"
+              class="form-range"
+              min="1"
+              max="10"
+              step="1"
               id="numberSelect"
               v-model="eventInfo.selectNum"
-            >
-              <option
-                v-for="(num, idx) in numOfParticipants"
-                :key="idx"
-                :disabled="!editable"
-              >
-                {{ num }}
-              </option>
-            </select>
+            />
+            <input
+              class="form-control white-bg numberSelect"
+              v-model="eventInfo.selectNum"
+              :disabled="!editable"
+            />
           </div>
         </div>
         <div class="mt-3">
@@ -99,9 +100,23 @@
                 :disabled="!image.isEditing"
               ></textarea>
               <div class="upload-btn-area">
-                 <font-awesome-icon class="ms-3" icon="edit" @click="eventInfo.images[index].isEditing = true;" v-if="!image.isEditing"/>
-                 <font-awesome-icon class="ms-3"  icon="check-circle" @click="eventInfo.images[index].isEditing = false;" v-if="image.isEditing" />
-                 <font-awesome-icon class="ms-3" icon="trash" @click="deletePhoto(index)" />
+                <font-awesome-icon
+                  class="ms-3"
+                  icon="edit"
+                  @click="eventInfo.images[index].isEditing = true"
+                  v-if="!image.isEditing"
+                />
+                <font-awesome-icon
+                  class="ms-3"
+                  icon="check-circle"
+                  @click="eventInfo.images[index].isEditing = false"
+                  v-if="image.isEditing"
+                />
+                <font-awesome-icon
+                  class="ms-3"
+                  icon="trash"
+                  @click="deletePhoto(index)"
+                />
               </div>
             </div>
           </div>
@@ -156,7 +171,6 @@ export default {
   setup() {
     const store = useStore();
     const editable = ref(true);
-    const numOfParticipants = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     const eventInfo = reactive({
       eventName: "",
       location: "",
@@ -198,7 +212,7 @@ export default {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const imageUrl = URL.createObjectURL(file);
-        images.push({ url: imageUrl, file, isEditing:true});
+        images.push({ url: imageUrl, file, isEditing: true });
       }
 
       eventInfo.images =
@@ -221,7 +235,7 @@ export default {
           formData.append("descs", item.desc);
         }
 
-         for (const item of eventInfo.images) {
+        for (const item of eventInfo.images) {
           formData.append("urls", item.url);
         }
 
@@ -251,8 +265,8 @@ export default {
             selectNum: eventInfo.selectNum,
             startTime: eventInfo.startTime,
             endTime: eventInfo.endTime,
-            photoDescs:eventInfo.images.map(item => item.desc),
-            photoUrls:eventInfo.images.map(item => item.url),
+            photoDescs: eventInfo.images.map((item) => item.desc),
+            photoUrls: eventInfo.images.map((item) => item.url),
           },
         };
         const requestOptions = {
@@ -273,7 +287,7 @@ export default {
     const getEventData = async () => {
       try {
         const data = await callApi("/events");
-        console.log('data',data)
+
         if (data) {
           const {
             eventName,
@@ -299,7 +313,7 @@ export default {
             eventInfo.images = photoUrls.map((photoUrl, index) => ({
               url: photoUrl,
               desc: photoDescs[index],
-              isEditing:false
+              isEditing: false,
             }));
           }
           editable.value = false;
@@ -312,8 +326,8 @@ export default {
     };
 
     const deletePhoto = (idx) => {
-      eventInfo.images.splice(idx, 1)
-    }
+      eventInfo.images.splice(idx, 1);
+    };
 
     onMounted(() => {
       inputFile.value = document.getElementById("inputFile");
@@ -322,7 +336,6 @@ export default {
 
     return {
       editable,
-      numOfParticipants,
       VueDatePicker,
       inputFile,
       images,
@@ -333,7 +346,7 @@ export default {
       getEventData,
       handleDelayedPhotoDesc,
       handlePhotoDesc,
-      deletePhoto
+      deletePhoto,
     };
   },
 };
@@ -353,7 +366,8 @@ export default {
   margin-top: 100px;
 }
 
-.numberSelect {
+.numberSelect,
+.form-range {
   width: 400px;
 }
 .datePicker {
@@ -374,8 +388,8 @@ export default {
 .upload-image-area {
   display: flex;
   flex-direction: column;
-  /* height: 543px, hard code now shoub be fixed */
-  height: 543px;
+  /* height: 572px, hard code now shoub be fixed */
+  height: 572px;
   padding: 10px;
   border: 1px solid #80808045;
   margin-top: 20px;
@@ -396,11 +410,10 @@ export default {
 }
 
 .upload-btn-area {
-  width:100px;
+  width: 100px;
   display: flex;
-  justify-content:center
+  justify-content: center;
 }
-
 
 input[type="file"] {
   display: none;
@@ -410,15 +423,7 @@ input[type="file"] {
   resize: none;
 }
 
-.dp__disabled {
-  background: white !important;
-}
-
 .line {
   border-top: 1px solid #8080803d;
-}
-
-.dp__input_wrap input {
-  background: white !important;
 }
 </style>
