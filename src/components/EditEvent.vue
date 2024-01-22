@@ -1,7 +1,15 @@
 <template>
-  <form class="ms-3 p-3 white-bg eidt-area w-100">
+  <form class="ms-3 p-3 white-bg eidt-area w-100 modal-content">
+    <div class="d-flex justify-content-end" v-if="editEvent">
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="modal"
+        aria-label="Close"
+      ></button>
+    </div>
     <div class="d-flex box-container">
-      <div class="setting-left-area">
+      <div>
         <h5 class="text-primary">event setting</h5>
         <InputField
           label="Event Name"
@@ -58,6 +66,7 @@
               class="datePicker white-bg"
               v-model="eventInfo.startTime"
               :disabled="!editable"
+              :minDate="getMinDate()"
             />
           </div>
           <div class="d-flex justify-content-left align-items-center mt-1">
@@ -66,6 +75,7 @@
               class="datePicker white-bg"
               v-model="eventInfo.endTime"
               :disabled="!editable"
+              :minDate="getMinDate()"
             />
           </div>
         </div>
@@ -85,40 +95,60 @@
             />
           </label>
           <div class="upload-image-area">
-            <div
-              v-for="(image, index) in eventInfo.images"
-              :key="index"
-              class="d-flex mb-1"
-            >
-              <img :src="image.url" alt="Uploaded Image" class="upload-image me-1" />
-              <textarea
-                class="textArea white-bg imgTextArea ms-3"
-                :value="eventInfo.images[index].desc"
-                @input="handleDelayedPhotoDesc(index, $event)"
-                placeholder="Enter event photo description."
-                v-if="eventInfo.images.length !== 0"
-                :disabled="!image.isEditing"
-              ></textarea>
-              <div class="upload-btn-area">
-                <font-awesome-icon
-                  class="ms-3"
-                  icon="edit"
-                  @click="eventInfo.images[index].isEditing = true"
-                  v-if="!image.isEditing"
-                />
-                <font-awesome-icon
-                  class="ms-3"
-                  icon="check-circle"
-                  @click="eventInfo.images[index].isEditing = false"
-                  v-if="image.isEditing"
-                />
-                <font-awesome-icon
-                  class="ms-3"
-                  icon="trash"
-                  @click="deletePhoto(index)"
-                />
-              </div>
-            </div>
+            <thead class="mb-3 white-bg">
+              <tr class="w-100">
+                <th>Images</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(image, index) in eventInfo.images"
+                :key="index"
+                class="d-flex mb-1"
+              >
+                <img :src="image.url" alt="Uploaded Image" class="upload-image me-1" />
+                <textarea
+                  class="textArea white-bg imgTextArea ms-3"
+                  :value="eventInfo.images[index].desc"
+                  @keyup="handlePhotoDesc(index, $event)"
+                  placeholder="Enter event photo description."
+                  v-if="image.uploadToCloud"
+                  :disabled="!image.isEditing"
+                ></textarea>
+                <textarea
+                  v-else
+                  class="textArea white-bg imgTextArea ms-3"
+                  disabled
+                ></textarea>
+                <div class="upload-btn-area">
+                  <font-awesome-icon
+                    class="ms-3 cursor-pointer"
+                    icon="edit"
+                    @click="eventInfo.images[index].isEditing = true"
+                    :class="{
+                      'disabled-icon': eventInfo.images[index].isEditing === editable,
+                    }"
+                    v-if="!image.isEditing"
+                  />
+                  <font-awesome-icon
+                    class="ms-3 cursor-pointer"
+                    icon="check-circle"
+                    @click="eventInfo.images[index].isEditing = false"
+                    v-if="image.isEditing"
+                  />
+                  <font-awesome-icon
+                    class="ms-3 cursor-pointer"
+                    icon="trash"
+                    :class="{
+                      'disabled-icon': eventInfo.images[index].isEditing === editable,
+                    }"
+                    @click="deletePhoto(index)"
+                  />
+                </div>
+              </tr>
+            </tbody>
           </div>
         </div>
       </div>
@@ -145,9 +175,17 @@
         type="button"
         class="btn btn-primary me-3"
         @click="applyEventInfo"
-        v-if="!editable"
+        v-if="!editable && !editEvent"
       >
         Apply
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary me-3"
+        @click="updateEventInfo"
+        v-if="!editable && editEvent"
+      >
+        Update
       </button>
     </div>
   </form>
@@ -156,11 +194,14 @@
 <script>
 import InputField from "../components/unit/InputField";
 import { callApi } from "../plugins/apiService.js";
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, toRefs } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { useStore } from "vuex";
 import { Toast } from "bootstrap";
+import { useRouter } from "vue-router";
+import { v4 as uuidv4 } from "uuid";
+import _debounce from "lodash/debounce";
 
 export default {
   name: "EditEvent",
@@ -168,40 +209,55 @@ export default {
     InputField,
     VueDatePicker,
   },
-  setup() {
+  props: {
+    editEvent: Object,
+  },
+  setup(props, { emit }) {
+    const { editEvent } = toRefs(props);
     const store = useStore();
+    const router = useRouter();
     const editable = ref(true);
-    const eventInfo = reactive({
+    let eventInfo = reactive({
       eventName: "",
       location: "",
       announcements: "",
-      selectNum: "",
+      selectNum: "1",
       startTime: "",
       endTime: "",
       images: [],
     });
+
+    if (editEvent.value) {
+      eventInfo.eventName = editEvent.value.eventName;
+      eventInfo.location = editEvent.value.location;
+      eventInfo.announcements = editEvent.value.announcements;
+      eventInfo.selectNum = editEvent.value.selectNum;
+      eventInfo.startTime = editEvent.value.startTime;
+      eventInfo.endTime = editEvent.value.endTime;
+      eventInfo.images = editEvent.value.images;
+    }
+
     const uploadFile = ref([]);
     const inputFile = ref(null);
     const images = reactive([]);
     const photoDesc = ref("");
-    let typingTimer = null;
-    let hasEventPhoto = false;
 
-    const handleDelayedPhotoDesc = (index, e) => {
-      clearTimeout(typingTimer);
-      typingTimer = setTimeout(() => {
-        handlePhotoDesc(index, e);
-      }, 500);
+    const getMinDate = () => {
+      const today = new Date();
+      today.setDate(today.getDate());
+      return today.toISOString().split("T")[0];
     };
 
-    const handlePhotoDesc = (index, e) => {
+    const handlePhotoDesc = _debounce((index, e) => {
       photoDesc.value = e.target.value;
       eventInfo.images[index].desc = e.target.value;
-    };
+      eventInfo.images[index].isEditing = false;
+    }, 500);
 
-    const handleImageUpload = (e) => {
+    const handleImageUpload = async (e) => {
       uploadFile.value.push(e.target.files[0]);
       const files = inputFile.value.files;
+
       if (eventInfo.images.length >= 4) {
         store.dispatch("failedMsg", "Upload up to four photos at most.");
         const toast = new Toast(document.querySelector(".toast"));
@@ -214,49 +270,33 @@ export default {
         const imageUrl = URL.createObjectURL(file);
         images.push({ url: imageUrl, file, isEditing: true });
       }
+      eventInfo.images = images;
 
-      eventInfo.images =
-        eventInfo.images.length !== 0 && hasEventPhoto
-          ? [...eventInfo.images, images[0]]
-          : images;
+      const formData = new FormData();
+      for (const file of uploadFile.value) {
+        formData.append("images", file);
+      }
+
+      const requestOptions = {
+        body: formData,
+      };
+      const firebaseDbImages = await callApi(
+        "/events/uploadImage",
+        "POST",
+        requestOptions
+      );
+      firebaseDbImages.forEach((url, idx) => {
+        eventInfo.images[idx].url = url;
+        eventInfo.images[idx].uploadToCloud = true;
+      });
     };
 
     const updateFieldValue = (field, event) => {
       eventInfo[field] = event.target.value;
     };
 
-    const uploadImage = async () => {
-      try {
-        const formData = new FormData();
-        for (const file of uploadFile.value) {
-          formData.append("images", file);
-        }
-        for (const item of eventInfo.images) {
-          formData.append("descs", item.desc);
-        }
-
-        for (const item of eventInfo.images) {
-          formData.append("urls", item.url);
-        }
-
-        const requestOptions = {
-          body: formData,
-        };
-        const data = await callApi("/events/uploadImage", "POST", requestOptions);
-        store.dispatch("successMsg", data.msg);
-        const toast = new Toast(document.querySelector(".toast"));
-        toast.show();
-        return data;
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
-    };
-
     const applyEventInfo = async () => {
       try {
-        const uploadResults = await uploadImage();
-        console.log("uploadResults", uploadResults);
-
         const eventSettingInfo = {
           event: {
             eventName: eventInfo.eventName,
@@ -265,63 +305,68 @@ export default {
             selectNum: eventInfo.selectNum,
             startTime: eventInfo.startTime,
             endTime: eventInfo.endTime,
-            photoDescs: eventInfo.images.map((item) => item.desc),
-            photoUrls: eventInfo.images.map((item) => item.url),
+            images: eventInfo.images.map(({ url, desc }) => ({ url, desc })),
+            uuid: uuidv4(),
           },
         };
+
         const requestOptions = {
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(eventSettingInfo),
         };
+        const eventData = await callApi("/events", "POST", requestOptions, store, Toast);
 
-        const eventData = await callApi("/events", "POST", requestOptions);
-
-        // Handle the results as needed
+        if (eventData.errorMsg) {
+          return;
+        }
+        
         store.dispatch("successMsg", eventData.msg);
+        const toast = new Toast(document.querySelector(".toast"));
+        toast.show();
+        setTimeout(() => {
+          router.push("/dashboard/initiatedEvent");
+        }, 2000);
+      } catch (error) {
+        console.error("error:", error);
+      }
+    };
+
+    const updateEventInfo = async () => {
+      try {
+        const updatedSettingInfo = {
+          event: {
+            eventName: eventInfo.eventName,
+            location: eventInfo.location,
+            announcements: eventInfo.announcements,
+            selectNum: eventInfo.selectNum,
+            startTime: eventInfo.startTime,
+            endTime: eventInfo.endTime,
+            images: eventInfo.images.map(({ url, desc }) => ({ url, desc })),
+            uuid: editEvent.value.uuid,
+          },
+        };
+
+        const requestOptions = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedSettingInfo),
+        };
+
+        const updatedEventData = await callApi(
+          "/events/" + editEvent.value.uuid,
+          "PUT",
+          requestOptions
+        );
+        
+        emit("event-updated", updatedEventData.data);
+        store.dispatch("successMsg", updatedEventData.msg);
         const toast = new Toast(document.querySelector(".toast"));
         toast.show();
       } catch (error) {
         console.log("error", error);
-      }
-    };
-
-    const getEventData = async () => {
-      try {
-        const data = await callApi("/events");
-
-        if (data) {
-          const {
-            eventName,
-            location,
-            announcements,
-            selectNum,
-            startTime,
-            endTime,
-            photoUrls,
-            photoDescs,
-          } = data;
-
-          if (photoUrls) hasEventPhoto = true;
-
-          eventInfo.eventName = eventName;
-          eventInfo.location = location;
-          eventInfo.announcements = announcements;
-          eventInfo.selectNum = selectNum;
-          eventInfo.startTime = startTime;
-          eventInfo.endTime = endTime;
-
-          if (photoUrls && photoUrls.length !== 0) {
-            eventInfo.images = photoUrls.map((photoUrl, index) => ({
-              url: photoUrl,
-              desc: photoDescs[index],
-              isEditing: false,
-            }));
-          }
-          editable.value = false;
-        } else {
-          console.error("Invalid API response:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching event data:", error);
       }
     };
 
@@ -331,7 +376,6 @@ export default {
 
     onMounted(() => {
       inputFile.value = document.getElementById("inputFile");
-      getEventData();
     });
 
     return {
@@ -343,27 +387,18 @@ export default {
       eventInfo,
       updateFieldValue,
       applyEventInfo,
-      getEventData,
-      handleDelayedPhotoDesc,
       handlePhotoDesc,
       deletePhoto,
+      getMinDate,
+      updateEventInfo,
     };
   },
 };
 </script>
 
 <style scoped>
-.imgTextArea {
-  height: 100%;
-}
 .box-container {
   margin-bottom: 30px;
-}
-.setting-left-area {
-  width: 1000px;
-}
-.eidt-area {
-  margin-top: 100px;
 }
 
 .numberSelect,
@@ -390,9 +425,28 @@ export default {
   flex-direction: column;
   /* height: 572px, hard code now shoub be fixed */
   height: 572px;
+  width: 700px;
   padding: 10px;
   border: 1px solid #80808045;
   margin-top: 20px;
+}
+
+.upload-image-area thead tr th {
+  font-weight: 200;
+}
+
+.upload-image-area thead tr th:first-child {
+  width: 100px;
+}
+
+.upload-image-area thead tr th:nth-child(2) {
+  width: 420px;
+  padding-left: 20px;
+}
+
+.upload-image-area thead tr th:last-child {
+  width: 100px;
+  padding-left: 30px;
 }
 
 .custom-file-upload {
@@ -425,5 +479,10 @@ input[type="file"] {
 
 .line {
   border-top: 1px solid #8080803d;
+}
+
+.disabled-icon {
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

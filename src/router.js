@@ -5,6 +5,7 @@ import Login from './components/Login.vue';
 import SignUP from './components/SignUP.vue';
 import Event from './components/Event.vue';
 import InitiateEvent from './pages/InitiateEvent.vue';
+import InitiatedEvent from './pages/InitiatedEvent.vue';
 import Profile from './components/Profile.vue';
 import PersonalActivity from './components/PersonalActivity.vue';
 import ProfilePage from './pages/ProfilePage.vue';
@@ -22,6 +23,11 @@ const routes = [
         path: 'initiateEvent',
         name:'InitiateEvent',
         component: InitiateEvent,
+      },
+      {
+        path: 'initiatedEvent',
+        name:'InitiatedEvent',
+        component: InitiatedEvent,
       },
       {
         path: 'profilepage',

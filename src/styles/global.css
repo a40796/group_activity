@@ -20,3 +20,21 @@
   .datePicker .dp__input{
     border: none;
   }
+
+  .mt-60{
+    margin-top: 60px;
+  }
+
+  .ellipsis{
+    text-overflow: ellipsis; 
+    white-space: nowrap;
+    overflow:hidden;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  .text-gray{
+    color: gray;
+  }

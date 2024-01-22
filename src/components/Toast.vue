@@ -8,7 +8,7 @@
         aria-live="assertive"
         aria-atomic="true"
       >
-        <div class="toast-body" :class="Message.success !== '' ? 'bg-info text-white' : 'bg-danger text-white'">
+        <div class="toast-body" :class="Message.success  ? 'bg-info text-white' : 'bg-danger text-white'">
           {{ Message.success || Message.error }}
         </div>
       </div>
@@ -25,7 +25,7 @@ export default {
   setup() {
     const store = useStore();
     const Message = computed(() => store.state.msg);
-
+    
     return {
       Message,
     };
