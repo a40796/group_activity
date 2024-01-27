@@ -39,8 +39,8 @@
 <script>
 import { ref } from "vue";
 import { useStore } from "vuex";
-import { Toast } from "bootstrap";
 import { callApi } from "../plugins/apiService.js";
+import {showToastMessage} from '/src/common.js'
 
 export default {
   name: "SignupForm",
@@ -70,9 +70,7 @@ export default {
       };
       try {
         const result = await callApi("/signup", "POST", requestOptions);
-        result.errorMsg ?  store.dispatch("failedMsg", result.errorMsg) :  store.dispatch("successMsg", result.msg);
-        const toast = new Toast(document.querySelector(".toast"));
-        toast.show();
+        result.errorMsg ?  showToastMessage(result.errorMsg, 'error', store) :  showToastMessage(result.msg, 'success', store);
       } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
       }

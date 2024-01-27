@@ -35,8 +35,8 @@
 <script>
 import { ref, watch, onMounted } from "vue";
 import { useStore } from "vuex";
-import { Toast } from "bootstrap";
 import { callApi } from "../../plugins/apiService.js";
+import {showToastMessage} from '/src/common.js'
 export default {
   name: "UploadField",
   setup() {
@@ -61,9 +61,7 @@ export default {
            body: formData,
         };
         const data = await callApi('/account/uploadImage','POST',requestOptions);
-        store.dispatch("successMsg", data.msg);
-        const toast = new Toast(document.querySelector(".toast"));
-        toast.show();
+        showToastMessage(data.msg,'success', store)
         cancelEditPhoto();
       } catch (error) {
         console.error("Error uploading image:", error);

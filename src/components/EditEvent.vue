@@ -202,6 +202,7 @@ import { Toast } from "bootstrap";
 import { useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";
 import _debounce from "lodash/debounce";
+import {showToastMessage} from '/src/common.js'
 
 export default {
   name: "EditEvent",
@@ -259,9 +260,7 @@ export default {
       const files = inputFile.value.files;
 
       if (eventInfo.images.length >= 4) {
-        store.dispatch("failedMsg", "Upload up to four photos at most.");
-        const toast = new Toast(document.querySelector(".toast"));
-        toast.show();
+        showToastMessage('Upload up to four photos at most.', 'error', store)
         return;
       }
 
@@ -328,10 +327,7 @@ export default {
           eventInfo.announcements = []
           return;
         }
-        
-        store.dispatch("successMsg", eventData.msg);
-        const toast = new Toast(document.querySelector(".toast"));
-        toast.show();
+        showToastMessage(eventData.msg, 'success', store)
         setTimeout(() => {
           router.push("/dashboard/initiatedEvent");
         }, 2000);
@@ -369,9 +365,7 @@ export default {
         );
         
         emit("event-updated", updatedEventData.data);
-        store.dispatch("successMsg", updatedEventData.msg);
-        const toast = new Toast(document.querySelector(".toast"));
-        toast.show();
+        showToastMessage(updatedEventData.msg, 'success', store)
       } catch (error) {
         console.log("error", error);
       }

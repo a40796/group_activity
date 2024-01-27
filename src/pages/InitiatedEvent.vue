@@ -81,7 +81,7 @@ import SideBar from "../components/unit/SideBar";
 import { onMounted, ref } from "vue";
 import { callApi } from "../plugins/apiService.js";
 import EditEvent from "../components/EditEvent";
-import { Toast } from "bootstrap";
+import {showToastMessage} from '/src/common.js'
 import { useStore } from "vuex";
 export default {
   name: "IntiatedEventPage",
@@ -175,9 +175,7 @@ export default {
       try {
         const res = await callApi("/events/" + id, "DELETE");
         if (res) {
-          store.dispatch("successMsg", res.msg);
-          const toast = new Toast(document.querySelector(".toast"));
-          toast.show();
+          showToastMessage(res.msg, 'success', store)
           getEventData();
         }
       } catch (error) {

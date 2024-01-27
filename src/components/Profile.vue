@@ -103,8 +103,8 @@
 import InputField from "./unit/InputField";
 import { useStore } from "vuex";
 import { computed, ref, reactive } from "vue";
-import { Toast } from "bootstrap";
 import { callApi } from "../plugins/apiService.js";
+import {showToastMessage} from '/src/common.js'
 export default {
   name: "ProfilePage",
   components: {
@@ -163,9 +163,7 @@ export default {
         const data = await callApi("/account", "POST", requestOptions);
         const message = data.msg;
         msg.value = message;
-        store.dispatch("successMsg", msg.value);
-        const toast = new Toast(document.querySelector(".toast"));
-        toast.show();
+        showToastMessage(msg.value,'success', store)
       } catch (error) {
         console.log("error", error);
       }
