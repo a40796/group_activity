@@ -24,7 +24,14 @@
                 data-bs-toggle="modal"
                 :data-bs-target="'#editEventModal' + item.uuid"
               >
-                Edit Event
+                Edit
+              </button>
+              <button
+                class="btn btn-primary ms-1"
+                type="button"
+                @click="handleDeleteEvent(item.uuid)"
+              >
+                Delete
               </button>
             </div>
             <div
@@ -74,6 +81,8 @@ import SideBar from "../components/unit/SideBar";
 import { onMounted, ref } from "vue";
 import { callApi } from "../plugins/apiService.js";
 import EditEvent from "../components/EditEvent";
+import { Toast } from "bootstrap";
+import { useStore } from "vuex";
 export default {
   name: "IntiatedEventPage",
   components: {
@@ -81,6 +90,7 @@ export default {
     EditEvent,
   },
   setup() {
+    const store = useStore();
     const initiatedEvents = ref([]);
     const routerLinkData = [
       {
@@ -122,7 +132,7 @@ export default {
       next: false,
     });
 
-    const togglePaginationButton = () => {
+  const togglePaginationButton = () => {
       pagination.value.pre = !pagination.value.pre;
       pagination.value.next = !pagination.value.next;
     };
@@ -161,6 +171,20 @@ export default {
       }
     };
 
+    const handleDeleteEvent = async (id) => {
+      try {
+        const res = await callApi("/events/" + id, "DELETE");
+        if (res) {
+          store.dispatch("successMsg", res.msg);
+          const toast = new Toast(document.querySelector(".toast"));
+          toast.show();
+          getEventData();
+        }
+      } catch (error) {
+        console.error("delete event error");
+      }
+    };
+
     onMounted(() => {
       getEventData();
     });
@@ -173,6 +197,7 @@ export default {
       showPageEvents,
       pagination,
       handlePagination,
+      handleDeleteEvent,
     };
   },
 };

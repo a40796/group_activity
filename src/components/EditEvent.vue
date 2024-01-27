@@ -319,6 +319,13 @@ export default {
         const eventData = await callApi("/events", "POST", requestOptions, store, Toast);
 
         if (eventData.errorMsg) {
+          eventInfo.eventName = ''
+          eventInfo.location = ''
+          eventInfo.announcements = ''
+          eventInfo.selectNum = '1'
+          eventInfo.startTime = ''
+          eventInfo.endTime = ''
+          eventInfo.announcements = []
           return;
         }
         
