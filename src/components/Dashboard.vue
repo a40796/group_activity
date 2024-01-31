@@ -2,7 +2,7 @@
   <nav class="navbar navbar-expand-sm bg-light">
     <div class="container-fluid">
       <ul class="navbar-nav">
-        <li class="nav-item">
+        <li class="nav-item fw-bolder">
           <router-link
             class="nav-link"
             :class="{ 'text-primary': routerActive === '/dashboard/event' }"
@@ -10,7 +10,7 @@
             >Event</router-link
           >
         </li>
-        <li class="nav-item">
+        <li class="nav-item fw-bolder">
           <router-link
             class="nav-link"
             :class="{ 'text-primary': routerActive === '/dashboard/initiateEvent' }"
@@ -18,7 +18,7 @@
             >Initiate an Event</router-link
           >
         </li>
-        <li class="nav-item">
+        <li class="nav-item fw-bolder">
           <router-link
             class="nav-link"
             :class="{

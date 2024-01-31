@@ -119,8 +119,10 @@
                 ></textarea>
                 <textarea
                   v-else
+                  :value="eventInfo.images[index].desc"
+                  @keyup="handlePhotoDesc(index, $event)"
                   class="textArea white-bg imgTextArea ms-3"
-                  disabled
+                  :disabled="!image.isEditing"
                 ></textarea>
                 <div class="upload-btn-area">
                   <font-awesome-icon
@@ -251,7 +253,9 @@ export default {
 
     const handlePhotoDesc = _debounce((index, e) => {
       photoDesc.value = e.target.value;
+      console.log('photoDesc.value',photoDesc.value)
       eventInfo.images[index].desc = e.target.value;
+      console.log('eventInfo.images',eventInfo.images)
       eventInfo.images[index].isEditing = false;
     }, 500);
 

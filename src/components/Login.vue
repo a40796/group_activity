@@ -1,12 +1,30 @@
 <template>
   <div class="login">
-    <h2>Login</h2>
-    <form @submit.prevent="login">
-      <input type="text" v-model="email" placeholder="Email" required />
-      <input type="password" v-model="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-    <div>not have account, <router-link to="/signup">sign up</router-link> here</div>
+    <div class="login-box white-bg">
+      <h2>Login</h2>
+      <form @submit.prevent="login">
+        <div class="white-bg mb-3">
+          <input type="text" v-model="email" placeholder="Email" required />
+        </div>
+        <div class="password-input white-bg mb-3">
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            v-model="password"
+            placeholder="Password"
+            required
+          />
+          <font-awesome-icon
+            class="ms-1"
+            :icon="showPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']"
+            @click="togglePasswordVisibility"
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      <div>
+        Don't have an account? <router-link to="/signup">Sign up</router-link> here
+      </div>
+    </div>
   </div>
 </template>
 
@@ -22,6 +40,8 @@ export default {
     const password = ref("");
     const router = useRouter();
     const store = useStore();
+    const showPassword = ref(false);
+
     const login = async () => {
       try {
         const data = {
@@ -51,10 +71,16 @@ export default {
       }
     };
 
+    const togglePasswordVisibility = () => {
+      showPassword.value = !showPassword.value;
+    };
+
     return {
       email,
       password,
       login,
+      showPassword,
+      togglePasswordVisibility,
     };
   },
 };
@@ -62,17 +88,35 @@ export default {
 
 <style scoped>
 .login {
-  max-width: 300px;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.login-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
-  border: 1px solid #ccc;
+  max-width: 400px;
+  min-height: 400px;
   border-radius: 5px;
-  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  padding-top: 50px;
+  height: 250px;
+}
+
+form input {
+  border: none;
 }
 
 input {
   width: 100%;
-  margin-bottom: 10px;
   padding: 5px;
 }
 
@@ -83,5 +127,17 @@ button {
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.password-input input {
+  width: calc(100% - 30px);
+  padding-right: 30px;
 }
 </style>

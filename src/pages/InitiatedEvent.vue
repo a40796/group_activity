@@ -81,7 +81,7 @@ import SideBar from "../components/unit/SideBar";
 import { onMounted, ref } from "vue";
 import { callApi } from "../plugins/apiService.js";
 import EditEvent from "../components/EditEvent";
-import {showToastMessage} from '/src/common.js'
+import { showToastMessage } from "/src/common.js";
 import { useStore } from "vuex";
 export default {
   name: "IntiatedEventPage",
@@ -132,7 +132,7 @@ export default {
       next: false,
     });
 
-  const togglePaginationButton = () => {
+    const togglePaginationButton = () => {
       pagination.value.pre = !pagination.value.pre;
       pagination.value.next = !pagination.value.next;
     };
@@ -150,6 +150,7 @@ export default {
     const getEventData = async () => {
       try {
         initiatedEvents.value = await callApi("/events");
+        console.log('initiatedEvents.value', initiatedEvents.value)
         if (initiatedEvents.value.length > 5) {
           showPageEvents.value = initiatedEvents.value.slice(0, 5);
           pagination.value.pre = false;
@@ -175,7 +176,7 @@ export default {
       try {
         const res = await callApi("/events/" + id, "DELETE");
         if (res) {
-          showToastMessage(res.msg, 'success', store)
+          showToastMessage(res.msg, "success", store);
           getEventData();
         }
       } catch (error) {
