@@ -350,10 +350,13 @@ export default {
             selectNum: eventInfo.selectNum,
             startTime: eventInfo.startTime,
             endTime: eventInfo.endTime,
-            images: eventInfo.images.map(({ url, desc }) => ({ url, desc })),
             uuid: editEvent.value.uuid,
           },
         };
+
+        if(eventInfo.images){
+          updatedSettingInfo.event.images = eventInfo.images.map(({ url, desc }) => ({ url, desc }))
+        }
 
         const requestOptions = {
           headers: {

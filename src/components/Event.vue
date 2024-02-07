@@ -1,53 +1,52 @@
 <template>
-  <div class="events-area" >
-    <div class="event white-bg pt-3" v-for="event in allEvents" :key="event.uuid">
+  <div class="events-area">
+    <div
+      class="event white-bg pt-3"
+      v-for="event in allEventsRef.events"
+      :key="event.uuid"
+    >
       <div class="fw-bold d-flex justify-content-between">
         {{ event.eventName }}
-        <font-awesome-icon class="white-bg cursor-pointer fs-6" icon="fa-heart" />
+        <font-awesome-icon
+          class="white-bg cursor-pointer fs-6 text-secondary"
+          icon="fa-heart"
+          title="Save"
+        />
       </div>
       <div class="mt-3">
-        <font-awesome-icon icon="location-dot" class="text-primary" />
+        <font-awesome-icon
+          icon="location-dot"
+          class="text-primary"
+          title="Event Location"
+        />
         <span class="ms-3 text-secondary fs-6">{{ event.location }}</span>
       </div>
       <div class="event-date fs-6 text-secondary">
-        <font-awesome-icon icon="fa-calendar" class="text-secondary" />
+        <font-awesome-icon icon="fa-calendar" class="text-secondary" title="Event Time" />
         <span class="ms-3">
           {{ new Date(event.startTime).getFullYear() }}
           {{ new Date(event.startTime).toLocaleString("en-US", { month: "short" }) }}
           {{ new Date(event.startTime).getDate() }}</span
         >
       </div>
+      <div>
+        <font-awesome-icon
+          icon="fa-user"
+          class="text-secondary"
+          title="Event Organizer"
+        />
+        <span class="ms-3 fs-6 text-secondary">{{ event.userName }}</span>
+      </div>
     </div>
   </div>
-  <div
-    class="pagination-area"
-  >
-    <nav aria-label="Page navigation example">
-      <ul class="pagination">
-        <li
-          class="page-item"
-          :class="{ disabled: pageNumbers[0] === parseInt(currentPage) }"
-        >
-          <a class="page-link" href="#" @click="handlePreNextPage('pre')">Previous</a>
-        </li>
-        <li
-          v-for="(item, idx) in page"
-          :key="idx"
-          class="page-item"
-          @click="getEventsByPage(idx + 1)"
-        >
-          <a class="page-link" href="#">{{ idx + 1 }}</a>
-        </li>
-        <li
-          class="page-item"
-          :class="{
-            disabled: pageNumbers[pageNumbers.length - 1] === parseInt(currentPage),
-          }"
-        >
-          <a class="page-link" href="#" @click="handlePreNextPage('next')">Next</a>
-        </li>
-      </ul>
-    </nav>
+  <div class="pagination-area">
+    <vue-awesome-paginate
+      :total-items="allEventsRef.totalItems"
+      :items-per-page="12"
+      :max-pages-shown="3"
+      v-model="currentPage"
+      :on-click="onClickHandler"
+    />
   </div>
 </template>
 
@@ -57,22 +56,15 @@ import { callApi } from "../plugins/apiService.js";
 export default {
   name: "EventPage",
   setup() {
-    const allEvents = ref([]);
     const currentPage = ref("1");
-    const page = ref(0);
-    const pageNumbers = ref([]);
-
+    const allEventsRef = ref({});
     /**
      * @function
      * 得到第一頁資料,並計算分頁頁數
      */
     const getEventsInit = async () => {
       const allEventData = await callApi(`/allEvents?page=${currentPage.value}`, "GET");
-      console.log("allEventData", allEventData);
-      const { events, itemsPerPage, totalItems } = allEventData;
-      allEvents.value = events;
-      page.value = Math.ceil(totalItems / itemsPerPage);
-      pageNumbers.value = Array.from({ length: page.value }, (_, idx) => idx + 1);
+      allEventsRef.value = allEventData;
     };
 
     /**
@@ -81,23 +73,15 @@ export default {
      */
     const getEventsByPage = async (page) => {
       const eventsData = await callApi(`/allEvents?page=${page}`, "GET");
-      allEvents.value = eventsData.events;
-      currentPage.value = eventsData.currentPage;
-      console.log("eventsData", eventsData);
+      allEventsRef.value = eventsData;
     };
 
     /**
      * @function
-     * 處理分頁 next, previous 邏輯
+     * 得到當前分頁
      */
-    const handlePreNextPage = (flag) => {
-      const targetPage =
-        flag === "pre"
-          ? parseInt(currentPage.value) - 1
-          : parseInt(currentPage.value) + 1;
-      if (targetPage >= 1 && targetPage <= page.value) {
-        getEventsByPage(targetPage.toString());
-      }
+    const onClickHandler = (page) => {
+      getEventsByPage(page)
     };
 
     onMounted(() => {
@@ -105,12 +89,9 @@ export default {
     });
 
     return {
-      allEvents,
-      page,
-      getEventsByPage,
-      handlePreNextPage,
       currentPage,
-      pageNumbers,
+      allEventsRef,
+      onClickHandler
     };
   },
 };
@@ -119,23 +100,56 @@ export default {
 <style scoped>
 .events-area {
   width: 100%;
-  height:100%;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 30px 50px 0 50px;
+  min-height: calc(100% - 200px);
+  max-height: calc(100% - 150px);
+  overflow: auto;
 }
 .event {
   width: 420px;
   height: 200px;
-  margin: 0 5px;
+  margin: 20px 10px;
   border-radius: 10px;
 }
 
 .pagination-area {
+  width: 100%;
+  position: fixed;
+  top: 93%;
+  padding: 0 90px;
   display: flex;
   justify-content: end;
-  padding: 0 50px 10px 50px;
+}
+
+.pagination-area >>> .pagination-container {
+  display: flex;
+  column-gap: 2px;
+}
+
+.pagination-area >>> .paginate-buttons {
+  height: 40px;
+  width: 40px;
+  cursor: pointer;
+  border: none;
+  background-color:white;
+  color: black;
+}
+
+.pagination-area >>> .paginate-buttons:hover {
+  background-color: #d8d8d8;
+}
+
+.pagination-area >>> .active-page {
+  background-color: #3498db;
+  border: 1px solid #3498db;
+  color: black;
+}
+
+.pagination-area >>> .active-page:hover {
+  background-color: #2988c8;
 }
 </style>
