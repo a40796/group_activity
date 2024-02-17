@@ -28,11 +28,7 @@
             class="text-secondary"
             title="Event Time"
           />
-          <span class="ms-3">
-            {{ new Date(event.startTime).getFullYear() }}
-            {{ new Date(event.startTime).toLocaleString("en-US", { month: "short" }) }}
-            {{ new Date(event.startTime).getDate() }}</span
-          >
+          <span class="ms-3">{{parseEventTimePeriod(event.startTime, event.endTime)}} </span>
         </div>
         <div class="d-flex mt-1">
           <font-awesome-icon
@@ -106,7 +102,12 @@
       <template #content>
         <div class="check-event-content">
           <div>Please select the number of participants</div>
-          <input type="number" v-model="selectedNumber" min="1" :max="dialogEvent.selectNum" />
+          <input
+            type="number"
+            v-model="selectedNumber"
+            min="1"
+            :max="dialogEvent.selectNum"
+          />
         </div>
       </template>
     </CustomizeDialog>
@@ -120,6 +121,8 @@ import { useStore } from "vuex";
 import { showToastMessage } from "/src/common.js";
 import { Toast } from "bootstrap";
 import CustomizeDialog from "/src/components/unit/CustomizeDialog.vue";
+import { useRouter } from "vue-router";
+import { parseEventTimePeriod } from "/src/common.js";
 export default {
   name: "EventPage",
   components: {
@@ -133,6 +136,7 @@ export default {
     const isDialogVisible = ref(false);
     const selectedNumber = ref(1);
     const dialogEvent = ref();
+    const router = useRouter();
 
     const showDialog = (event) => {
       dialogEvent.value = event;
@@ -141,7 +145,7 @@ export default {
 
     const closeDialog = () => {
       isDialogVisible.value = false;
-      selectedNumber.value = 1
+      selectedNumber.value = 1;
     };
 
     const handleOk = () => {
@@ -209,6 +213,7 @@ export default {
             allEventsRef.value.events[index] = updatedEventData.data;
           }
           showToastMessage(updatedEventData.msg, "success", store);
+          router.push("/dashboard/profilePage/activity");
         }
       } catch (error) {
         console.log("error", error);
@@ -233,6 +238,7 @@ export default {
       handleOk,
       dialogEvent,
       calcJoinNums,
+      parseEventTimePeriod
     };
   },
 };

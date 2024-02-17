@@ -10,3 +10,15 @@ export function showToastMessage(message, type = "success" ,store) {
   const toast = new Toast(document.querySelector(".toast"));
   toast.show(); 
 }
+
+export function parseEventTimePeriod(startTime, endTime){
+  return `${new Date(startTime).getFullYear()} ${new Date(
+    startTime
+  ).toLocaleString("en-US", { month: "short" })} ${new Date(
+    startTime
+  ).getDate()} - ${new Date(endTime).getFullYear()} ${new Date(
+    endTime
+  ).toLocaleString("en-US", { month: "short" })} ${new Date(
+    endTime
+  ).getDate()}`
+}
