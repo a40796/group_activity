@@ -112,15 +112,16 @@
                 <textarea
                   class="textArea white-bg imgTextArea ms-3"
                   :value="eventInfo.images[index].desc"
-                  @keyup="handlePhotoDesc(index, $event)"
+                  @keyup.enter="handlePhotoDesc(index, $event)"
                   placeholder="Enter event photo description."
                   v-if="image.uploadToCloud"
                   :disabled="!image.isEditing"
+                  :class="`photoDesc_${index}`"
                 ></textarea>
                 <textarea
                   v-else
                   :value="eventInfo.images[index].desc"
-                  @keyup="handlePhotoDesc(index, $event)"
+                  @keyup.enter="handlePhotoDesc(index, $event)"
                   class="textArea white-bg imgTextArea ms-3"
                   :disabled="!image.isEditing"
                 ></textarea>
@@ -130,21 +131,21 @@
                     icon="edit"
                     @click="eventInfo.images[index].isEditing = true"
                     :class="{
-                      'disabled-icon': eventInfo.images[index].isEditing === editable,
+                      'disabled-icon': !editable,
                     }"
                     v-if="!image.isEditing"
                   />
                   <font-awesome-icon
                     class="ms-3 cursor-pointer"
                     icon="check-circle"
-                    @click="eventInfo.images[index].isEditing = false"
                     v-if="image.isEditing"
+                    @click="handlePhotoDescDone(index)"
                   />
                   <font-awesome-icon
                     class="ms-3 cursor-pointer"
                     icon="trash"
                     :class="{
-                      'disabled-icon': eventInfo.images[index].isEditing === editable,
+                      'disabled-icon': !editable,
                     }"
                     @click="deletePhoto(index)"
                   />
@@ -204,7 +205,7 @@ import { Toast } from "bootstrap";
 import { useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";
 import _debounce from "lodash/debounce";
-import {showToastMessage} from '/src/common.js'
+import { showToastMessage } from "/src/common.js";
 
 export default {
   name: "EditEvent",
@@ -253,18 +254,21 @@ export default {
 
     const handlePhotoDesc = _debounce((index, e) => {
       photoDesc.value = e.target.value;
-      console.log('photoDesc.value',photoDesc.value)
       eventInfo.images[index].desc = e.target.value;
-      console.log('eventInfo.images',eventInfo.images)
       eventInfo.images[index].isEditing = false;
     }, 500);
+
+    const handlePhotoDescDone = (index) => {
+      eventInfo.images[index].desc = document.querySelector(`.photoDesc_${index}`).value;
+      eventInfo.images[index].isEditing = false;
+    };
 
     const handleImageUpload = async (e) => {
       uploadFile.value.push(e.target.files[0]);
       const files = inputFile.value.files;
 
-      if (eventInfo.images.length >= 4) {
-        showToastMessage('Upload up to four photos at most.', 'error', store)
+      if (eventInfo.images && eventInfo.images.length >= 4) {
+        showToastMessage("Upload up to four photos at most.", "error", store);
         return;
       }
 
@@ -273,7 +277,6 @@ export default {
         const imageUrl = URL.createObjectURL(file);
         images.push({ url: imageUrl, file, isEditing: true });
       }
-      eventInfo.images = images;
 
       const formData = new FormData();
       for (const file of uploadFile.value) {
@@ -288,10 +291,13 @@ export default {
         "POST",
         requestOptions
       );
-      firebaseDbImages.forEach((url, idx) => {
-        eventInfo.images[idx].url = url;
-        eventInfo.images[idx].uploadToCloud = true;
-      });
+
+      if(eventInfo.images && eventInfo.images.length > 0){
+        eventInfo.images.push({ url: firebaseDbImages[firebaseDbImages.length - 1], uploadToCloud: true, isEditing:true });
+      }else{
+         eventInfo.images = [{ url: firebaseDbImages[0], uploadToCloud: true, isEditing:true }]
+      }
+      
     };
 
     const updateFieldValue = (field, event) => {
@@ -322,16 +328,16 @@ export default {
         const eventData = await callApi("/events", "POST", requestOptions, store, Toast);
 
         if (eventData.errorMsg) {
-          eventInfo.eventName = ''
-          eventInfo.location = ''
-          eventInfo.announcements = ''
-          eventInfo.selectNum = '1'
-          eventInfo.startTime = ''
-          eventInfo.endTime = ''
-          eventInfo.announcements = []
+          eventInfo.eventName = "";
+          eventInfo.location = "";
+          eventInfo.announcements = "";
+          eventInfo.selectNum = "1";
+          eventInfo.startTime = "";
+          eventInfo.endTime = "";
+          eventInfo.announcements = [];
           return;
         }
-        showToastMessage(eventData.msg, 'success', store)
+        showToastMessage(eventData.msg, "success", store);
         setTimeout(() => {
           router.push("/dashboard/initiatedEvent");
         }, 2000);
@@ -354,8 +360,11 @@ export default {
           },
         };
 
-        if(eventInfo.images){
-          updatedSettingInfo.event.images = eventInfo.images.map(({ url, desc }) => ({ url, desc }))
+        if (eventInfo.images) {
+          updatedSettingInfo.event.images = eventInfo.images.map(({ url, desc }) => ({
+            url,
+            desc,
+          }));
         }
 
         const requestOptions = {
@@ -370,9 +379,9 @@ export default {
           "PUT",
           requestOptions
         );
-        
+
         emit("event-updated", updatedEventData.data);
-        showToastMessage(updatedEventData.msg, 'success', store)
+        showToastMessage(updatedEventData.msg, "success", store);
       } catch (error) {
         console.log("error", error);
       }
@@ -399,6 +408,7 @@ export default {
       deletePhoto,
       getMinDate,
       updateEventInfo,
+      handlePhotoDescDone,
     };
   },
 };

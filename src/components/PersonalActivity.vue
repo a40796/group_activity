@@ -6,25 +6,42 @@
       </DataTable>
     </div>
     <div class="pagination-area">
-        <vue-awesome-paginate
-          :total-items="attendedEvents.length"
-          :items-per-page="6"
-          :max-pages-shown="3"
-          v-model="currentPage"
-          :on-click="getAttendedEvents"
-        />
-      </div>
+      <vue-awesome-paginate
+        :total-items="attendedEvents.length"
+        :items-per-page="6"
+        :max-pages-shown="3"
+        v-model="currentPage"
+        :on-click="getAttendedEvents"
+      />
+    </div>
   </div>
+  <PopupWindow v-if="isPopupVisible">
+    <template v-slot:detail>
+      <div class="detail-popup">
+        <div class="orange-color fw-bold mb-3">{{ detailEvent.eventName }}</div>
+        <div class="detail-popup-container">
+          <div>
+            <span>{{ detailEvent.announcements }}</span>
+            <DataTable :columns="detailColumns" :rows="detailRows"></DataTable>
+          </div>
+        </div>
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary" @click="hidePopup">Close</button>
+        </div>
+      </div>
+    </template>
+  </PopupWindow>
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, reactive, computed } from "vue";
 import { callApi } from "../plugins/apiService.js";
 import DataTable from "/src/components/unit/CustomizeDatatable.vue";
 import { parseEventTimePeriod } from "/src/common.js";
+import PopupWindow from "/src/components/unit/PopupWindow.vue";
 export default {
   name: "PersonalActivity",
-  components: { DataTable },
+  components: { DataTable, PopupWindow },
   setup() {
     const currentPage = ref("1");
     const attendedEvents = ref([]);
@@ -64,7 +81,40 @@ export default {
         },
       },
     ]);
+    const detailColumns = ref([
+      {
+        label: "Image",
+        field: "image",
+        width: "10%",
+        isKey: true,
+        display: function (row) {
+          return (
+            `<image style="width:80px;height:80px" src="${row.image}">`
+          );
+        },
+      },
+      {
+        label: "Description",
+        field: "description",
+        width: "10%",
+        isKey: true,
+      },
+    ]);
+    const detailRows = computed(()=>{
+      if(!detailEvent.images){
+        return {}
+      }
+      return detailEvent.images.map((item)=>{
+        return {
+          image:item.url,
+          description:item.desc
+        }
+      })
+    })
     const rows = ref([]);
+    const isPopupVisible = ref(false);
+
+    const detailEvent = reactive({});
 
     const getAllEvents = async () => {
       try {
@@ -82,8 +132,30 @@ export default {
       }
     };
 
-    const handleOpenDetail = (id) => {
-      console.log("id", id);
+    const handleOpenDetail = async (id) => {
+      const { event } = await callApi(`/allEvents?id=${id}`, "GET");
+      const {
+        announcements,
+        endTime,
+        eventName,
+        joinUserId,
+        location,
+        selectNum,
+        startTime,
+        userName,
+        images,
+      } = event;
+      detailEvent.announcements = announcements;
+      detailEvent.endTime = endTime;
+      detailEvent.eventName = eventName;
+      detailEvent.joinUserId = joinUserId;
+      detailEvent.location = location;
+      detailEvent.startTime = startTime;
+      detailEvent.userName = userName;
+      detailEvent.selectNum = selectNum;
+      detailEvent.images = images;
+      console.log("event", event);
+      showPopup();
     };
 
     const getAttendedEvents = (page) => {
@@ -110,6 +182,14 @@ export default {
       );
     };
 
+    const showPopup = () => {
+      isPopupVisible.value = true;
+    };
+
+    const hidePopup = () => {
+      isPopupVisible.value = false;
+    };
+
     onMounted(() => {
       getAllEvents();
     });
@@ -121,6 +201,12 @@ export default {
       getAttendedEvents,
       attendedEvents,
       perpageAttendedEvents,
+      showPopup,
+      hidePopup,
+      isPopupVisible,
+      detailEvent,
+      detailColumns,
+      detailRows,
     };
   },
 };
@@ -138,8 +224,8 @@ export default {
   margin-bottom: 20px;
 }
 
-.attended-events-table{
-  height:600px
+.attended-events-table {
+  height: 600px;
 }
 
 .pagination-area {
@@ -175,4 +261,13 @@ export default {
 .pagination-area >>> .active-page:hover {
   background-color: #2988c8;
 }
+
+.detail-popup {
+  height: 500px;
+}
+
+.detail-popup-container {
+  height: 420px;
+}
+
 </style>
