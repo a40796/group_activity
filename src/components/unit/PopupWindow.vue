@@ -1,6 +1,6 @@
 <template>
   <teleport to="body">
-    <div class="popup-background"  @click="hidePopup"></div>
+    <div class="popup-background" @click="hidePopup"></div>
   </teleport>
   <teleport to="body">
     <div class="popup-window">
@@ -11,6 +11,20 @@
   </teleport>
 </template>
 
+<script>
+export default {
+  setup(props, { emit }) {
+    const hidePopup = () => {
+      emit('hidePopupWindow')
+    };
+
+    return {
+      hidePopup,
+    };
+  },
+};
+</script>
+
 <style scoped>
 .popup-background {
   position: fixed;
@@ -19,24 +33,22 @@
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999; 
+  z-index: 999;
 }
 
-.popup-content {
-  /* Add styling for your popup content */
-}
 .popup-window {
+  height: 90vh;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: white;
   border: 1px solid #ccc;
-  padding: 20px;
+  padding: 30px;
   z-index: 1000;
 }
 
 .popup-content {
-  width:800px;
+  width: 1200px;
 }
 </style>

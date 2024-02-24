@@ -5,7 +5,7 @@
       <DataTable :columns="columns" :rows="rows" @open-detail="handleOpenDetail">
       </DataTable>
     </div>
-    <div class="pagination-area">
+    <div class="person-activity-pagination-area">
       <vue-awesome-paginate
         :total-items="attendedEvents.length"
         :items-per-page="6"
@@ -15,18 +15,42 @@
       />
     </div>
   </div>
-  <PopupWindow v-if="isPopupVisible">
+  <PopupWindow v-if="isPopupVisible" @hidePopupWindow="isPopupVisible = false">
     <template v-slot:detail>
       <div class="detail-popup">
-        <div class="orange-color fw-bold mb-3">{{ detailEvent.eventName }}</div>
+        <div class="orange-color fw-bold mb-3 event-title d-flex justify-content-between">
+          <div>{{ detailEvent.eventName }}</div>
+          <button
+            type="button"
+            class="btn-close"
+            style="font-size: 12px"
+            @click="isPopupVisible = false"
+          ></button>
+        </div>
         <div class="detail-popup-container">
+          <div class="event-annoucement">{{ detailEvent.announcements }}</div>
           <div>
-            <span>{{ detailEvent.announcements }}</span>
+            <div class="text-primary fw-bold">Event time</div>
+            <div>
+              {{ parseEventTimePeriod(detailEvent.startTime, detailEvent.endTime) }}
+            </div>
+          </div>
+          <div>
+            <div class="text-primary fw-bold">Event location</div>
+            <div>{{ detailEvent.location }}</div>
+          </div>
+          <div>
+            <div class="text-primary fw-bold">Number of Events</div>
+            <div>{{ detailEvent.selectNum }}</div>
+          </div>
+          <div>
+            <div class="text-primary fw-bold">Event Number</div>
+            <div>{{ detailEvent.uuid }}</div>
+          </div>
+          <div class="text-primary fw-bold">Event photo</div>
+          <div class="detail-table mt-1">
             <DataTable :columns="detailColumns" :rows="detailRows"></DataTable>
           </div>
-        </div>
-        <div class="d-flex justify-content-center">
-          <button class="btn btn-primary" @click="hidePopup">Close</button>
         </div>
       </div>
     </template>
@@ -88,9 +112,7 @@ export default {
         width: "10%",
         isKey: true,
         display: function (row) {
-          return (
-            `<image style="width:80px;height:80px" src="${row.image}">`
-          );
+          return `<image style="width:100px;height:100px" src="${row.image}">`;
         },
       },
       {
@@ -100,17 +122,17 @@ export default {
         isKey: true,
       },
     ]);
-    const detailRows = computed(()=>{
-      if(!detailEvent.images){
-        return {}
+    const detailRows = computed(() => {
+      if (!detailEvent.images) {
+        return {};
       }
-      return detailEvent.images.map((item)=>{
+      return detailEvent.images.map((item) => {
         return {
-          image:item.url,
-          description:item.desc
-        }
-      })
-    })
+          image: item.url,
+          description: item.desc,
+        };
+      });
+    });
     const rows = ref([]);
     const isPopupVisible = ref(false);
 
@@ -144,6 +166,7 @@ export default {
         startTime,
         userName,
         images,
+        uuid,
       } = event;
       detailEvent.announcements = announcements;
       detailEvent.endTime = endTime;
@@ -154,6 +177,7 @@ export default {
       detailEvent.userName = userName;
       detailEvent.selectNum = selectNum;
       detailEvent.images = images;
+      detailEvent.uuid = uuid;
       console.log("event", event);
       showPopup();
     };
@@ -186,10 +210,6 @@ export default {
       isPopupVisible.value = true;
     };
 
-    const hidePopup = () => {
-      isPopupVisible.value = false;
-    };
-
     onMounted(() => {
       getAllEvents();
     });
@@ -202,11 +222,11 @@ export default {
       attendedEvents,
       perpageAttendedEvents,
       showPopup,
-      hidePopup,
       isPopupVisible,
       detailEvent,
       detailColumns,
       detailRows,
+      parseEventTimePeriod,
     };
   },
 };
@@ -225,21 +245,25 @@ export default {
 }
 
 .attended-events-table {
-  height: 600px;
+  max-height: 750px;
+  overflow: auto;
 }
 
-.pagination-area {
+.person-activity-pagination-area {
+  position: fixed;
+  top: 94%;
+  right: 6%;
   width: 100%;
   display: flex;
   justify-content: end;
 }
 
-.pagination-area >>> .pagination-container {
+.person-activity-pagination-area >>> .pagination-container {
   display: flex;
   column-gap: 2px;
 }
 
-.pagination-area >>> .paginate-buttons {
+.person-activity-pagination-area >>> .paginate-buttons {
   height: 40px;
   width: 40px;
   cursor: pointer;
@@ -248,26 +272,40 @@ export default {
   color: black;
 }
 
-.pagination-area >>> .paginate-buttons:hover {
+.person-activity-pagination-area >>> .paginate-buttons:hover {
   background-color: #d8d8d8;
 }
 
-.pagination-area >>> .active-page {
+.person-activity-pagination-area >>> .active-page {
   background-color: #3498db;
   border: 1px solid #3498db;
   color: black;
 }
 
-.pagination-area >>> .active-page:hover {
+.person-activity-pagination-area >>> .active-page:hover {
   background-color: #2988c8;
 }
 
 .detail-popup {
-  height: 500px;
+  height: 450px;
 }
 
 .detail-popup-container {
   height: 420px;
+  font-size: 16px;
+  color: gray;
 }
 
+.detail-table {
+  max-height: 450px;
+  overflow: auto;
+}
+
+.event-title {
+  border-bottom: 1px solid orange;
+}
+
+.event-annoucement {
+  margin: 8px 0;
+}
 </style>

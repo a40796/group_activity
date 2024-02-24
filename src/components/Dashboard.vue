@@ -33,7 +33,7 @@
       </ul>
     </div>
     <div class="d-flex justify-content-end pe-5 username">
-      Hi,<span class="text-primary">{{ dbUser.name }}</span>
+      Hi,<span class="text-primary fw-bold">{{ dbUser.name }}</span>
     </div>
     <div
       class="d-flex justify-content-end me-3 align-items-center btn btn-outline-secondary"
@@ -94,10 +94,10 @@ export default {
   width: 20%;
 }
 .logout-btn {
-  background-color: white; /* Set the background color to white */
-  padding: 5px 10px; /* Adjust padding as needed */
-  border-radius: 4px; /* Rounded corners */
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+  background-color: white; 
+  padding: 5px 10px; 
+  border-radius: 4px; 
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); 
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 </style>

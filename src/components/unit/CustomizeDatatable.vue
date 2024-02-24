@@ -77,6 +77,8 @@ export default {
 ::v-deep(.vtl-table tr) {
   border: none;
   border-bottom: 1px solid #f0f0f8fc;
+  font-size:16px;
+  max-height:40px;
 }
 ::v-deep(.vtl-tbody-td) {
   color: gray;

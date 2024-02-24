@@ -28,7 +28,9 @@
             class="text-secondary"
             title="Event Time"
           />
-          <span class="ms-3">{{parseEventTimePeriod(event.startTime, event.endTime)}} </span>
+          <span class="ms-3"
+            >{{ parseEventTimePeriod(event.startTime, event.endTime) }}
+          </span>
         </div>
         <div class="d-flex mt-1">
           <font-awesome-icon
@@ -59,7 +61,7 @@
         </div>
       </div>
       <div class="event-buttons">
-        <button type="button" class="btn btn-light">
+        <button type="button" class="btn btn-light" @click="showEventDetail(event)">
           <font-awesome-icon
             class="fs-6 text-secondary"
             icon="fa-circle-info"
@@ -112,10 +114,49 @@
       </template>
     </CustomizeDialog>
   </div>
+  <PopupWindow v-if="isPopupVisible" @hidePopupWindow="isPopupVisible = false">
+    <template v-slot:detail>
+      <div class="detail-popup">
+        <div class="orange-color fw-bold mb-3 event-title d-flex justify-content-between">
+          <div>{{ detailEvent.eventName }}</div>
+          <button
+            type="button"
+            class="btn-close "
+            @click="isPopupVisible = false"
+          ></button>
+        </div>
+        <div class="detail-popup-container">
+          <div class="event-annoucement">{{ detailEvent.announcements }}</div>
+          <div>
+            <div class="text-primary fw-bold">Event time</div>
+            <div>
+              {{ parseEventTimePeriod(detailEvent.startTime, detailEvent.endTime) }}
+            </div>
+          </div>
+          <div>
+            <div class="text-primary fw-bold">Event location</div>
+            <div>{{ detailEvent.location }}</div>
+          </div>
+          <div>
+            <div class="text-primary fw-bold">Number of Events</div>
+            <div>{{ detailEvent.selectNum }}</div>
+          </div>
+          <div>
+            <div class="text-primary fw-bold">Event Number</div>
+            <div>{{ detailEvent.uuid }}</div>
+          </div>
+          <div class="text-primary fw-bold">Event photo</div>
+          <div class="detail-table mt-1">
+            <DataTable :columns="detailColumns" :rows="detailRows"></DataTable>
+          </div>
+        </div>
+      </div>
+    </template>
+  </PopupWindow>
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import { callApi } from "../plugins/apiService.js";
 import { useStore } from "vuex";
 import { showToastMessage } from "/src/common.js";
@@ -123,10 +164,14 @@ import { Toast } from "bootstrap";
 import CustomizeDialog from "/src/components/unit/CustomizeDialog.vue";
 import { useRouter } from "vue-router";
 import { parseEventTimePeriod } from "/src/common.js";
+import PopupWindow from "/src/components/unit/PopupWindow.vue";
+import DataTable from "/src/components/unit/CustomizeDatatable.vue";
 export default {
   name: "EventPage",
   components: {
     CustomizeDialog,
+    DataTable,
+    PopupWindow,
   },
   setup() {
     const currentPage = ref("1");
@@ -137,6 +182,8 @@ export default {
     const selectedNumber = ref(1);
     const dialogEvent = ref();
     const router = useRouter();
+    const isPopupVisible = ref(false);
+    const detailEvent = reactive({});
 
     const showDialog = (event) => {
       dialogEvent.value = event;
@@ -220,6 +267,27 @@ export default {
       }
     };
 
+    const showEventDetail = ({
+      announcements,
+      endTime,
+      eventName,
+      images,
+      location,
+      selectNum,
+      startTime,
+      uuid,
+    }) => {
+      isPopupVisible.value = true;
+      detailEvent.announcements = announcements
+      detailEvent.endTime = endTime
+      detailEvent.eventName = eventName
+      detailEvent.images = images
+      detailEvent.location = location
+      detailEvent.selectNum = selectNum
+      detailEvent.startTime = startTime
+      detailEvent.uuid = uuid
+    };
+
     onMounted(() => {
       getEventsInit();
     });
@@ -238,7 +306,10 @@ export default {
       handleOk,
       dialogEvent,
       calcJoinNums,
-      parseEventTimePeriod
+      parseEventTimePeriod,
+      showEventDetail,
+      isPopupVisible,
+      detailEvent
     };
   },
 };
@@ -284,7 +355,6 @@ export default {
 
 .pagination-area {
   width: 100%;
-
   padding: 0 90px;
   display: flex;
   justify-content: end;
@@ -337,5 +407,9 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+}
+
+.btn-close{
+  font-size:12px
 }
 </style>
