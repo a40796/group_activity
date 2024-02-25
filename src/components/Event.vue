@@ -117,7 +117,7 @@
   <PopupWindow v-if="isPopupVisible" @hidePopupWindow="isPopupVisible = false">
     <template v-slot:detail>
       <div class="detail-popup">
-        <div class="orange-color fw-bold mb-3 event-title d-flex justify-content-between">
+        <div class="orange-color fw-bold mb-3 event-title d-flex justify-content-between event-name">
           <div>{{ detailEvent.eventName }}</div>
           <button
             type="button"
@@ -146,7 +146,7 @@
             <div>{{ detailEvent.uuid }}</div>
           </div>
           <div class="text-primary fw-bold">Event photo</div>
-          <div class="detail-table mt-1">
+          <div class="detail-table">
             <DataTable :columns="detailColumns" :rows="detailRows"></DataTable>
           </div>
         </div>
@@ -156,7 +156,7 @@
 </template>
 
 <script>
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, computed } from "vue";
 import { callApi } from "../plugins/apiService.js";
 import { useStore } from "vuex";
 import { showToastMessage } from "/src/common.js";
@@ -194,6 +194,35 @@ export default {
       isDialogVisible.value = false;
       selectedNumber.value = 1;
     };
+
+     const detailColumns = ref([
+      {
+        label: "Image",
+        field: "image",
+        width: "10%",
+        isKey: true,
+        display: function (row) {
+          return `<image style="width:100px;height:100px" src="${row.image}">`;
+        },
+      },
+      {
+        label: "Description",
+        field: "description",
+        width: "10%",
+        isKey: true,
+      },
+    ]);
+    const detailRows = computed(() => {
+      if (!detailEvent.images) {
+        return {};
+      }
+      return detailEvent.images.map((item) => {
+        return {
+          image: item.url,
+          description: item.desc,
+        };
+      });
+    });
 
     const handleOk = () => {
       joinEvent(dialogEvent.value);
@@ -309,7 +338,9 @@ export default {
       parseEventTimePeriod,
       showEventDetail,
       isPopupVisible,
-      detailEvent
+      detailEvent,
+      detailColumns,
+      detailRows
     };
   },
 };
@@ -331,10 +362,6 @@ export default {
   height: 230px;
   margin: 20px 10px;
   border-radius: 10px;
-}
-
-.event-title {
-  height: 50px;
 }
 
 .event-buttons {
@@ -412,4 +439,19 @@ export default {
 .btn-close{
   font-size:12px
 }
+
+.detail-table {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.event-name{
+  border-bottom:1px solid orange;
+}
+
+.detail-popup-container{
+  font-size:16px;
+  color:gray;
+}
+
 </style>

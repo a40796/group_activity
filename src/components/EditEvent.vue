@@ -240,8 +240,8 @@ export default {
       eventInfo.selectNum = editEvent.selectNum;
       eventInfo.startTime = editEvent.startTime;
       eventInfo.endTime = editEvent.endTime;
-      if(editEvent.images && editEvent.images.length > 0){
-         eventInfo.images = editEvent.images
+      if (editEvent.images && editEvent.images.length > 0) {
+        eventInfo.images = editEvent.images;
       }
      
     });
@@ -296,14 +296,14 @@ export default {
         requestOptions
       );
 
-      if (eventInfo.images && eventInfo.images.length > 0) {
-        eventInfo.images.push({
-          url: firebaseDbImages[firebaseDbImages.length - 1],
-          uploadToCloud: true,
-          isEditing: true,
-        });
-      } 
-      
+      eventInfo.images.push({
+        url:
+          eventInfo.images && eventInfo.images.length > 0
+            ? firebaseDbImages[firebaseDbImages.length - 1]
+            : firebaseDbImages[0],
+        uploadToCloud: true,
+        isEditing: true,
+      });
     };
 
     const updateFieldValue = (field, event) => {
