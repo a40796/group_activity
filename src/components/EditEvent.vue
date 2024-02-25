@@ -197,7 +197,7 @@
 <script>
 import InputField from "../components/unit/InputField";
 import { callApi } from "../plugins/apiService.js";
-import { ref, reactive, onMounted, toRefs } from "vue";
+import { ref, reactive, onMounted, watch, toRefs } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { useStore } from "vuex";
@@ -215,9 +215,10 @@ export default {
   },
   props: {
     editEvent: Object,
+    currentOpenEvent: Object,
   },
   setup(props, { emit }) {
-    const { editEvent } = toRefs(props);
+    const { editEvent, currentOpenEvent } = toRefs(props);
     const store = useStore();
     const router = useRouter();
     const editable = ref(true);
@@ -231,15 +232,19 @@ export default {
       images: [],
     });
 
-    if (editEvent.value) {
-      eventInfo.eventName = editEvent.value.eventName;
-      eventInfo.location = editEvent.value.location;
-      eventInfo.announcements = editEvent.value.announcements;
-      eventInfo.selectNum = editEvent.value.selectNum;
-      eventInfo.startTime = editEvent.value.startTime;
-      eventInfo.endTime = editEvent.value.endTime;
-      eventInfo.images = editEvent.value.images;
-    }
+
+    watch(currentOpenEvent, (editEvent) => {
+      eventInfo.eventName = editEvent.eventName;
+      eventInfo.location = editEvent.location;
+      eventInfo.announcements = editEvent.announcements;
+      eventInfo.selectNum = editEvent.selectNum;
+      eventInfo.startTime = editEvent.startTime;
+      eventInfo.endTime = editEvent.endTime;
+      if(editEvent.images && editEvent.images.length > 0){
+         eventInfo.images = editEvent.images
+      }
+     
+    });
 
     const uploadFile = ref([]);
     const inputFile = ref(null);
@@ -266,7 +271,6 @@ export default {
     const handleImageUpload = async (e) => {
       uploadFile.value.push(e.target.files[0]);
       const files = inputFile.value.files;
-
       if (eventInfo.images && eventInfo.images.length >= 4) {
         showToastMessage("Upload up to four photos at most.", "error", store);
         return;
@@ -292,11 +296,13 @@ export default {
         requestOptions
       );
 
-      if(eventInfo.images && eventInfo.images.length > 0){
-        eventInfo.images.push({ url: firebaseDbImages[firebaseDbImages.length - 1], uploadToCloud: true, isEditing:true });
-      }else{
-         eventInfo.images = [{ url: firebaseDbImages[0], uploadToCloud: true, isEditing:true }]
-      }
+      if (eventInfo.images && eventInfo.images.length > 0) {
+        eventInfo.images.push({
+          url: firebaseDbImages[firebaseDbImages.length - 1],
+          uploadToCloud: true,
+          isEditing: true,
+        });
+      } 
       
     };
 

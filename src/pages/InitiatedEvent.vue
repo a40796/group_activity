@@ -30,6 +30,7 @@
                   type="button"
                   data-bs-toggle="modal"
                   :data-bs-target="'#editEventModal' + item.uuid"
+                  @click="getCurrentOpenEvent(item)"
                 >
                   Edit
                 </button>
@@ -53,6 +54,7 @@
                 >
                   <EditEvent
                     :editEvent="item"
+                    :currentOpenEvent="currentOpenEvent"
                     @event-updated="handleEventUpdated"
                   ></EditEvent>
                 </div>
@@ -160,6 +162,8 @@ export default {
       );
     };
 
+    const currentOpenEvent = ref({})
+
     const getEventData = async () => {
       try {
         const initiatedEventsData = await callApi("/events");
@@ -199,6 +203,10 @@ export default {
       }
     };
 
+    const getCurrentOpenEvent = (item) =>{
+      currentOpenEvent.value = item
+    }
+
     onMounted(() => {
       getEventData();
     });
@@ -212,6 +220,8 @@ export default {
       pagination,
       handlePagination,
       handleDeleteEvent,
+      getCurrentOpenEvent,
+      currentOpenEvent
     };
   },
 };
