@@ -17,8 +17,10 @@
     border: none;
   }
 
-  .datePicker .dp__input{
+  .datePicker .dp__input , .meetingTimePicker .dp__input{
     border: none;
+    height: 24px;
+    font-size: 14px;
   }
 
   .mt-60{

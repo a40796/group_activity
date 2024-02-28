@@ -446,7 +446,7 @@ export default {
 }
 
 .event-name{
-  border-bottom:1px solid orange;
+  border-bottom:1px solid #8080803b;
 }
 
 .detail-popup-container{

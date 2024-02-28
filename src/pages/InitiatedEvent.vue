@@ -264,7 +264,7 @@ export default {
 
 .modal-content {
   width: 1220px !important;
-  height: 825px;
+  height: 850px;
   padding: 35px 35px 0 35px !important;
 }
 

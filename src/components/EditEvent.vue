@@ -25,23 +25,25 @@
           :value="eventInfo.location"
           @updateValue="updateFieldValue('location', $event)"
         />
-        <div class="d-flex flex-column">
-          <label for="exampleSelect" class="form-label"
-            >Event Guidelines and Announcements
-          </label>
-          <textarea
-            class="textArea white-bg"
-            id="story"
-            name="story"
-            rows="5"
-            cols="30"
-            v-model="eventInfo.announcements"
-            :disabled="!editable"
-          ></textarea>
-        </div>
+        <InputField
+          label="Assembling Place"
+          type="text"
+          :editable="editable"
+          :value="eventInfo.assemblingPlace"
+          @updateValue="updateFieldValue('assemblingPlace', $event)"
+        />
+        <div>Meeting Time:</div>
+        <VueDatePicker
+          class="meetingTimePicker white-bg"
+          v-model="eventInfo.meetingTime"
+          :disabled="!editable"
+          :minDate="getMinDate()"
+        />
         <div class="container p-0 mt-3">
           <div class="form-group">
-            <label for="exampleSelect" class="form-label">Number of Participants:</label>
+            <label for="exampleSelect" class="form-label"
+              ><div>Number of Participants:</div></label
+            >
             <input
               type="range"
               class="form-range"
@@ -57,6 +59,9 @@
               :disabled="!editable"
             />
           </div>
+          <div class="text-danger setting-hint">
+            * The maximum number is limited to 10 participants by default.
+          </div>
         </div>
         <div class="mt-3">
           <label for="exampleSelect" class="form-label">Event Time:</label>
@@ -67,9 +72,13 @@
               v-model="eventInfo.startTime"
               :disabled="!editable"
               :minDate="getMinDate()"
+              :enable-time-picker="false"
             />
           </div>
-          <div class="d-flex justify-content-left align-items-center mt-1">
+          <div
+            style="margin-top: 13px"
+            class="d-flex justify-content-left align-items-center"
+          >
             <div class="endTitle">End:</div>
             <VueDatePicker
               class="datePicker white-bg"
@@ -81,7 +90,7 @@
         </div>
       </div>
       <div class="w-100 ps-3">
-        <h5 class="text-primary">Event Picture:</h5>
+        <h5 class="text-primary">Event Picture and Announcements</h5>
         <div class="mt-1">
           <label for="inputFile" class="custom-file-upload bg-secondary">
             <span>Upload Event Image</span>
@@ -94,7 +103,7 @@
               :disabled="!editable"
             />
           </label>
-          <div class="upload-image-area">
+          <div class="upload-image-area white-bg">
             <thead class="mb-3 white-bg">
               <tr class="w-100">
                 <th>Images</th>
@@ -111,16 +120,15 @@
                 <img :src="image.url" alt="Uploaded Image" class="upload-image me-1" />
                 <textarea
                   class="textArea white-bg imgTextArea ms-3"
-                  :value="eventInfo.images[index].desc"
+                  v-model="eventInfo.images[index].desc"
                   @keyup.enter="handlePhotoDesc(index, $event)"
                   placeholder="Enter event photo description."
                   v-if="image.uploadToCloud"
                   :disabled="!image.isEditing"
-                  :class="`photoDesc_${index}`"
                 ></textarea>
                 <textarea
                   v-else
-                  :value="eventInfo.images[index].desc"
+                  v-model="eventInfo.images[index].desc"
                   @keyup.enter="handlePhotoDesc(index, $event)"
                   class="textArea white-bg imgTextArea ms-3"
                   :disabled="!image.isEditing"
@@ -152,6 +160,21 @@
                 </div>
               </tr>
             </tbody>
+          </div>
+          <div class="fs-6 text-danger setting-hint">
+            * The maximum number is limited to 4 pictures by default.
+          </div>
+          <div class="d-flex flex-column">
+            <div class="mb-3 setting-hint">Event Guidelines and Announcements</div>
+            <textarea
+              class="white-bg annocement-text"
+              id="story"
+              name="story"
+              rows="5"
+              cols="30"
+              v-model="eventInfo.announcements"
+              :disabled="!editable"
+            ></textarea>
           </div>
         </div>
       </div>
@@ -231,25 +254,24 @@ export default {
       endTime: "",
       images: [],
     });
-
-
-    watch(currentOpenEvent, (editEvent) => {
-      eventInfo.eventName = editEvent.eventName;
-      eventInfo.location = editEvent.location;
-      eventInfo.announcements = editEvent.announcements;
-      eventInfo.selectNum = editEvent.selectNum;
-      eventInfo.startTime = editEvent.startTime;
-      eventInfo.endTime = editEvent.endTime;
-      if (editEvent.images && editEvent.images.length > 0) {
-        eventInfo.images = editEvent.images;
-      }
-     
-    });
-
     const uploadFile = ref([]);
     const inputFile = ref(null);
     const images = reactive([]);
     const photoDesc = ref("");
+
+    watch(currentOpenEvent, (editEvent) => {
+      eventInfo.eventName = editEvent.eventName;
+      eventInfo.location = editEvent.location;
+      eventInfo.assemblingPlace = editEvent.assemblingPlace;
+      eventInfo.announcements = editEvent.announcements;
+      eventInfo.selectNum = editEvent.selectNum;
+      eventInfo.startTime = editEvent.startTime;
+      eventInfo.endTime = editEvent.endTime;
+      eventInfo.meetingTime = editEvent.meetingTime;
+      if (editEvent.images && editEvent.images.length > 0) {
+        eventInfo.images = editEvent.images;
+      }
+    });
 
     const getMinDate = () => {
       const today = new Date();
@@ -264,7 +286,6 @@ export default {
     }, 500);
 
     const handlePhotoDescDone = (index) => {
-      eventInfo.images[index].desc = document.querySelector(`.photoDesc_${index}`).value;
       eventInfo.images[index].isEditing = false;
     };
 
@@ -316,10 +337,12 @@ export default {
           event: {
             eventName: eventInfo.eventName,
             location: eventInfo.location,
+            assemblingPlace: eventInfo.assemblingPlace,
             announcements: eventInfo.announcements,
             selectNum: eventInfo.selectNum,
             startTime: eventInfo.startTime,
             endTime: eventInfo.endTime,
+            meetingTime: eventInfo.meetingTime,
             images: eventInfo.images.map(({ url, desc }) => ({ url, desc })),
             uuid: uuidv4(),
           },
@@ -336,10 +359,12 @@ export default {
         if (eventData.errorMsg) {
           eventInfo.eventName = "";
           eventInfo.location = "";
+          eventInfo.assemblingPlace = "";
           eventInfo.announcements = "";
           eventInfo.selectNum = "1";
           eventInfo.startTime = "";
           eventInfo.endTime = "";
+          eventInfo.meetingTime = "";
           eventInfo.announcements = [];
           return;
         }
@@ -358,10 +383,12 @@ export default {
           event: {
             eventName: eventInfo.eventName,
             location: eventInfo.location,
+            assemblingPlace: eventInfo.assemblingPlace,
             announcements: eventInfo.announcements,
             selectNum: eventInfo.selectNum,
             startTime: eventInfo.startTime,
             endTime: eventInfo.endTime,
+            meetingTime: eventInfo.meetingTime,
             uuid: editEvent.value.uuid,
           },
         };
@@ -425,6 +452,10 @@ export default {
   margin-bottom: 30px;
 }
 
+.numberSelect {
+  font-size: 14px;
+}
+
 .numberSelect,
 .form-range {
   width: 400px;
@@ -447,12 +478,10 @@ export default {
 .upload-image-area {
   display: flex;
   flex-direction: column;
-  /* height: 572px, hard code now shoub be fixed */
-  height: 572px;
-  width: 700px;
+  height: 350px;
   padding: 10px;
-  border: 1px solid #80808045;
   margin-top: 20px;
+  overflow: auto;
 }
 
 .upload-image-area thead tr th {
@@ -499,6 +528,8 @@ input[type="file"] {
 .textArea {
   width: 400px;
   resize: none;
+  color: gray;
+  font-size: 14px;
 }
 
 .line {
@@ -508,5 +539,19 @@ input[type="file"] {
 .disabled-icon {
   opacity: 0.5;
   pointer-events: none;
+}
+
+.meetingTimePicker {
+  width: 400px;
+  margin: 5px 0 5px 0;
+}
+
+.setting-hint {
+  margin-top: 8px;
+}
+
+.annocement-text {
+  color: gray;
+  font-size: 14px;
 }
 </style>

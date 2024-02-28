@@ -45,6 +45,8 @@ export default {
 
 <style scoped>
 .inputStyle {
-  width: 400px
+  width: 400px;
+  color:gray;
+  font-size:14px;
 }
 </style>

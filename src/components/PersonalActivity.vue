@@ -302,7 +302,7 @@ export default {
 }
 
 .event-title {
-  border-bottom: 1px solid orange;
+  border-bottom: 1px solid #8080803b
 }
 
 .event-annoucement {
