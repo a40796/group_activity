@@ -117,11 +117,13 @@
   <PopupWindow v-if="isPopupVisible" @hidePopupWindow="isPopupVisible = false">
     <template v-slot:detail>
       <div class="detail-popup">
-        <div class="orange-color fw-bold mb-3 event-title d-flex justify-content-between event-name">
+        <div
+          class="orange-color fw-bold mb-3 event-title d-flex justify-content-between event-name"
+        >
           <div>{{ detailEvent.eventName }}</div>
           <button
             type="button"
-            class="btn-close "
+            class="btn-close"
             @click="isPopupVisible = false"
           ></button>
         </div>
@@ -156,7 +158,7 @@
 </template>
 
 <script>
-import { onMounted, ref, reactive, computed } from "vue";
+import { onMounted, ref, reactive, computed, onBeforeMount, onUnmounted } from "vue";
 import { callApi } from "../plugins/apiService.js";
 import { useStore } from "vuex";
 import { showToastMessage } from "/src/common.js";
@@ -184,6 +186,7 @@ export default {
     const router = useRouter();
     const isPopupVisible = ref(false);
     const detailEvent = reactive({});
+    let getEventTimer;
 
     const showDialog = (event) => {
       dialogEvent.value = event;
@@ -195,7 +198,7 @@ export default {
       selectedNumber.value = 1;
     };
 
-     const detailColumns = ref([
+    const detailColumns = ref([
       {
         label: "Image",
         field: "image",
@@ -307,19 +310,31 @@ export default {
       uuid,
     }) => {
       isPopupVisible.value = true;
-      detailEvent.announcements = announcements
-      detailEvent.endTime = endTime
-      detailEvent.eventName = eventName
-      detailEvent.images = images
-      detailEvent.location = location
-      detailEvent.selectNum = selectNum
-      detailEvent.startTime = startTime
-      detailEvent.uuid = uuid
+      detailEvent.announcements = announcements;
+      detailEvent.endTime = endTime;
+      detailEvent.eventName = eventName;
+      detailEvent.images = images;
+      detailEvent.location = location;
+      detailEvent.selectNum = selectNum;
+      detailEvent.startTime = startTime;
+      detailEvent.uuid = uuid;
     };
+
+    onUnmounted(()=>{
+      clearInterval(getEventTimer)
+    })
+
+    onBeforeMount(() => {
+      getEventTimer = setInterval(() => {
+        getEventsInit();
+      }, 3000);
+    });
 
     onMounted(() => {
       getEventsInit();
     });
+
+
 
     return {
       currentPage,
@@ -340,7 +355,7 @@ export default {
       isPopupVisible,
       detailEvent,
       detailColumns,
-      detailRows
+      detailRows,
     };
   },
 };
@@ -436,8 +451,8 @@ export default {
   justify-content: center;
 }
 
-.btn-close{
-  font-size:12px
+.btn-close {
+  font-size: 12px;
 }
 
 .detail-table {
@@ -445,13 +460,12 @@ export default {
   overflow: auto;
 }
 
-.event-name{
-  border-bottom:1px solid #8080803b;
+.event-name {
+  border-bottom: 1px solid #8080803b;
 }
 
-.detail-popup-container{
-  font-size:16px;
-  color:gray;
+.detail-popup-container {
+  font-size: 16px;
+  color: gray;
 }
-
 </style>

@@ -67,13 +67,7 @@
           <label for="exampleSelect" class="form-label">Event Time:</label>
           <div class="d-flex justify-content-left align-items-center mt-1">
             <div class="startTitle">Start:</div>
-            <VueDatePicker
-              class="datePicker white-bg"
-              v-model="eventInfo.startTime"
-              :disabled="!editable"
-              :minDate="getMinDate()"
-              :enable-time-picker="false"
-            />
+            <div class="startTime white-bg">{{ parseDateTimePicker(eventInfo.meetingTime) }}</div>
           </div>
           <div
             style="margin-top: 13px"
@@ -265,7 +259,6 @@ export default {
       eventInfo.assemblingPlace = editEvent.assemblingPlace;
       eventInfo.announcements = editEvent.announcements;
       eventInfo.selectNum = editEvent.selectNum;
-      eventInfo.startTime = editEvent.startTime;
       eventInfo.endTime = editEvent.endTime;
       eventInfo.meetingTime = editEvent.meetingTime;
       if (editEvent.images && editEvent.images.length > 0) {
@@ -340,7 +333,6 @@ export default {
             assemblingPlace: eventInfo.assemblingPlace,
             announcements: eventInfo.announcements,
             selectNum: eventInfo.selectNum,
-            startTime: eventInfo.startTime,
             endTime: eventInfo.endTime,
             meetingTime: eventInfo.meetingTime,
             images: eventInfo.images.map(({ url, desc }) => ({ url, desc })),
@@ -362,7 +354,6 @@ export default {
           eventInfo.assemblingPlace = "";
           eventInfo.announcements = "";
           eventInfo.selectNum = "1";
-          eventInfo.startTime = "";
           eventInfo.endTime = "";
           eventInfo.meetingTime = "";
           eventInfo.announcements = [];
@@ -386,7 +377,6 @@ export default {
             assemblingPlace: eventInfo.assemblingPlace,
             announcements: eventInfo.announcements,
             selectNum: eventInfo.selectNum,
-            startTime: eventInfo.startTime,
             endTime: eventInfo.endTime,
             meetingTime: eventInfo.meetingTime,
             uuid: editEvent.value.uuid,
@@ -424,6 +414,18 @@ export default {
       eventInfo.images.splice(idx, 1);
     };
 
+    const parseDateTimePicker = (date) => {
+      if (!date) {
+        return "";
+      }
+      const inputDatetime = new Date(date);
+      return `${(inputDatetime.getMonth() + 1).toString().padStart(2, "0")}/
+         ${inputDatetime.getDate().toString().padStart(2, "0")}/
+         ${inputDatetime.getFullYear()}, 
+         ${inputDatetime.getHours().toString().padStart(2, "0")}:
+         ${inputDatetime.getMinutes().toString().padStart(2, "0")}`;
+    };
+
     onMounted(() => {
       inputFile.value = document.getElementById("inputFile");
     });
@@ -442,6 +444,7 @@ export default {
       getMinDate,
       updateEventInfo,
       handlePhotoDescDone,
+      parseDateTimePicker,
     };
   },
 };
@@ -553,5 +556,13 @@ input[type="file"] {
 .annocement-text {
   color: gray;
   font-size: 14px;
+}
+
+.startTime {
+  margin-left: 20px;
+  padding-left:20px;
+  font-size: 14px;
+  height:40px;
+  width:340px;
 }
 </style>

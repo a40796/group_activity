@@ -19,7 +19,7 @@
               <div class="ellipsis event-name">{{ item.eventName }}</div>
               <div class="text-gray">
                 {{
-                  `${formattedDateTime(item.startTime)} - ${formattedDateTime(
+                  `${formattedDateTime(item.meetingTime)} - ${formattedDateTime(
                     item.endTime
                   )}`
                 }}
@@ -189,6 +189,7 @@ export default {
       if (index !== -1) {
         initiatedEvents.value[index] = updatedEvent;
       }
+      getEventData()
     };
 
     const handleDeleteEvent = async (id) => {
