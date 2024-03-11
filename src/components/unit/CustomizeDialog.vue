@@ -12,7 +12,9 @@
       </div>
       <div class="button-area mt-1 mb-1">
         <button type="button" class="btn-style" @click="closeDialog">Cancel</button>
-        <button type="button" class="btn-style ms-3" @click="clickOk">Ok</button>
+        <button type="button" class="btn-style ms-3" @click="clickOk">
+          {{ customizeOk ?? customizeOk }}
+        </button>
       </div>
     </div>
   </div>
@@ -27,22 +29,29 @@ export default {
     },
     title: {
       type: String,
-      default: "Dialog",
+      default: "",
     },
+    customizeOk: {
+      type: String,
+      default: "ok",
+    },
+    signupRef:{
+      type:Boolean
+    }
   },
-  emits: ["close"],
+  emits: ["close", "ok"],
   setup(props, { emit }) {
     const closeDialog = () => {
       emit("close");
     };
 
     const clickOk = () => {
-        emit("ok");
-    }
+      emit("ok");
+    };
 
     return {
       closeDialog,
-      clickOk
+      clickOk,
     };
   },
 };

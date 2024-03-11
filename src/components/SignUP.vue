@@ -1,12 +1,12 @@
 <template>
-  <div class="login">
-    <h2>Sign Up</h2>
+  <div class="sign-up">
+    <h2 class="mb-3 text-primary">SIGN UP</h2>
     <form @submit.prevent="signup">
-      <input type="text" v-model="email" placeholder="Email" required />
-      <input type="password" v-model="password" placeholder="Password" required />
-      <input type="text" v-model="name" placeholder="Name" required />
-      <input type="text" v-model="phone" placeholder="Phone" required />
-      <input type="text" v-model="address" placeholder="Address" required />
+      <input class="white-bg mb-3 signup-input" type="text" v-model="email" placeholder="Email" required />
+      <input class="white-bg mb-3 signup-input" type="password" v-model="password" placeholder="Password" required />
+      <input class="white-bg mb-3 signup-input" type="text" v-model="name" placeholder="Name" required />
+      <input class="white-bg mb-3 signup-input" type="text" v-model="phone" placeholder="Phone" required />
+      <input class="white-bg mb-3 signup-input" type="text" v-model="address" placeholder="Address" required />
       <div class="d-flex pb-3">
         <input
           type="radio"
@@ -14,7 +14,7 @@
           name="gender"
           value="male"
           checked
-          class="radioInput me-1"
+          class="me-1"
           v-model="selectedGender"
         />
         <label for="male">Male</label>
@@ -23,28 +23,31 @@
           id="female"
           name="gender"
           value="female"
-          class="radioInput ms-3 me-1"
+          class="ms-3 me-1"
           v-model="selectedGender"
         />
         <label for="female">Female</label>
       </div>
-      <button type="submit">Sign Up</button>
+      <!-- <button type="submit">Sign Up</button> -->
     </form>
-    <div>
+    <!-- <div>
       go to <span class="text-primary"><router-link to="/">login</router-link></span>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, watch} from "vue";
 import { useStore } from "vuex";
 import { callApi } from "../plugins/apiService.js";
 import {showToastMessage} from '/src/common.js'
 
 export default {
   name: "SignupForm",
-  setup() {
+   props: {
+    signupRef: Boolean,
+  },
+  setup(props) {
     const store = useStore();
     const email = ref("");
     const password = ref("");
@@ -52,6 +55,13 @@ export default {
     const phone = ref("");
     const address = ref("");
     const selectedGender = ref("male");
+     watch(
+      () => props.signupRef,
+      (newValue) => {
+        if(newValue) signup()
+      }
+    );
+
     const signup = async () => {
       const data = {
         email: email.value,
@@ -89,16 +99,15 @@ export default {
 </script>
 
 <style scoped>
-.login {
+.sign-up {
   max-width: 300px;
   margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
   border-radius: 5px;
   text-align: center;
+  font-size:14px
 }
 
-input {
+.signup-input {
   width: 100%;
   margin-bottom: 10px;
   padding: 5px;
@@ -113,8 +122,4 @@ button {
   cursor: pointer;
 }
 
-.radioInput {
-  width: 10%;
-  margin-bottom: 0;
-}
 </style>

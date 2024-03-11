@@ -15,7 +15,7 @@
             v-for="(item, idx) in showPageEvents"
             :key="idx"
           >
-            <div class="initiated-event-container">
+            <div class="initiated-event-container" >
               <div class="ellipsis event-name">{{ item.eventName }}</div>
               <div class="text-gray">
                 {{

@@ -72,7 +72,7 @@
           type="button"
           class="btn btn-light ms-1"
           @click="showDialog(event)"
-          v-if="store.state.user.uid !== event.userId"
+          v-if="store.state.user && store.state.user.uid !== event.userId"
         >
           <font-awesome-icon
             class="fs-6 text-secondary"
@@ -97,20 +97,12 @@
       :is-visible="isDialogVisible"
       @close="closeDialog"
       @ok="handleOk"
-      :title="`<span class='fs-6'>Are you sure to join</span> <span class='fs-8'>${
+      :title="`<span class='fs-6'>Are you sure to join</span> <span class='fs-6 text-primary'>${
         dialogEvent ? dialogEvent.eventName : ''
       }</span>`"
     >
       <template #content>
-        <div class="check-event-content">
-          <div>Please select the number of participants</div>
-          <input
-            type="number"
-            v-model="selectedNumber"
-            min="1"
-            :max="dialogEvent.selectNum"
-          />
-        </div>
+        
       </template>
     </CustomizeDialog>
   </div>
@@ -132,7 +124,7 @@
           <div>
             <div class="text-primary fw-bold">Event time</div>
             <div>
-              {{ parseEventTimePeriod(detailEvent.startTime, detailEvent.endTime) }}
+              {{ parseEventTimePeriod(detailEvent.meetingTime, detailEvent.endTime) }}
             </div>
           </div>
           <div>

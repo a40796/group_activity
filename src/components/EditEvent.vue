@@ -41,9 +41,7 @@
         />
         <div class="container p-0 mt-3">
           <div class="form-group">
-            <label for="exampleSelect" class="form-label"
-              ><div>Number of Participants:</div></label
-            >
+            <div>Number of Participants:</div>
             <input
               type="range"
               class="form-range"
@@ -59,7 +57,7 @@
               :disabled="!editable"
             />
           </div>
-          <div class="text-danger setting-hint">
+          <div class="text-danger setting-hint participants fs-6">
             * The maximum number is limited to 10 participants by default.
           </div>
         </div>
@@ -67,7 +65,9 @@
           <label for="exampleSelect" class="form-label">Event Time:</label>
           <div class="d-flex justify-content-left align-items-center mt-1">
             <div class="startTitle">Start:</div>
-            <div class="startTime white-bg">{{ parseDateTimePicker(eventInfo.meetingTime) }}</div>
+            <div class="startTime white-bg">
+              {{ parseDateTimePicker(eventInfo.meetingTime) }}
+            </div>
           </div>
           <div
             style="margin-top: 13px"
@@ -83,7 +83,7 @@
           </div>
         </div>
       </div>
-      <div class="w-100 ps-3">
+      <div class="picture-annoucements-area ps-3">
         <h5 class="text-primary">Event Picture and Announcements</h5>
         <div class="mt-1">
           <label for="inputFile" class="custom-file-upload bg-secondary">
@@ -453,6 +453,8 @@ export default {
 <style scoped>
 .box-container {
   margin-bottom: 30px;
+  align-items: center;
+  justify-content: center;
 }
 
 .numberSelect {
@@ -560,9 +562,17 @@ input[type="file"] {
 
 .startTime {
   margin-left: 20px;
-  padding-left:20px;
+  padding-left: 20px;
   font-size: 14px;
-  height:40px;
-  width:340px;
+  height: 40px;
+  width: 340px;
+}
+
+.picture-annoucements-area {
+  width: 660px;
+}
+
+.participants {
+  width: 400px;
 }
 </style>

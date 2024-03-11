@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-sm bg-light">
+  <nav class="navbar navbar-expand-sm bg-light" v-if="store.state.user">
     <div class="container-fluid">
       <ul class="navbar-nav">
         <li class="nav-item fw-bolder">
@@ -43,16 +43,36 @@
       <span class="ms-1">Logout</span>
     </div>
   </nav>
+  <nav class="navbar navbar-expand-sm bg-light d-flex justify-content-end px-3" v-else>
+    <div class="btn btn-outline-secondary" @click="showDialog">Sign up</div>
+     <CustomizeDialog
+      :is-visible="isDialogVisible"
+      @close="closeDialog"
+      @ok="handleSignup"
+      :customizeOk="`Sign Up`"
+      :signupRef="signupRef"
+    >
+      <template #content>
+        <SignupForm :signupRef="signupRef"></SignupForm>
+      </template>
+    </CustomizeDialog>
+  </nav>
   <router-view> </router-view>
 </template>
 
 <script>
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { callApi } from "../plugins/apiService.js";
+import CustomizeDialog from "/src/components/unit/CustomizeDialog.vue";
+import SignupForm from "/src/components/SignUP.vue"
 export default {
   name: "DashboardPage",
+  components: {
+    CustomizeDialog,
+    SignupForm
+  },
   setup() {
     const store = useStore();
     const user = computed(() => store.state.user);
@@ -61,6 +81,8 @@ export default {
     const routerActive = computed(() => {
       return router.currentRoute.value.path;
     });
+    const isDialogVisible = ref(false);
+    const signupRef = ref(false)
 
     onMounted(async () => {
       try {
@@ -68,7 +90,7 @@ export default {
         store.dispatch("addUser", userData);
         store.commit("dbUser", JSON.parse(JSON.stringify(userData)));
       } catch (error) {
-        router.push("/");
+        router.push("/dashboard/event");
       }
     });
 
@@ -79,11 +101,24 @@ export default {
       }
     };
 
+    const showDialog = () => {
+      isDialogVisible.value = true
+    }
+
+    const handleSignup = () => {
+      signupRef.value = true
+    }
+
     return {
       user,
       dbUser,
       logout,
       routerActive,
+      store,
+      showDialog,
+      isDialogVisible,
+      handleSignup,
+      signupRef
     };
   },
 };
@@ -94,10 +129,10 @@ export default {
   width: 20%;
 }
 .logout-btn {
-  background-color: white; 
-  padding: 5px 10px; 
-  border-radius: 4px; 
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); 
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 </style>

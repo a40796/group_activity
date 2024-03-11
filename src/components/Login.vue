@@ -22,7 +22,6 @@
         <button type="submit">Login</button>
       </form>
       <div>
-        Don't have an account? <router-link to="/signup">Sign up</router-link> here
       </div>
     </div>
   </div>
