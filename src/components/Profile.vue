@@ -113,7 +113,6 @@ export default {
   setup() {
     const store = useStore();
     const user = computed(() => store.state.user);
-    const dbUser = computed(() => store.state.dbUser);
     const editable = ref(true);
     const isdisabled = ref(true);
     const showBan = reactive({
@@ -130,18 +129,16 @@ export default {
     const msg = ref("");
     const handleUpdateValue = (e, id) => {
       user.value[id] = e.target.value;
-      console.log("handleUpdateValue", e.target.value);
     };
+
     const editProfile = () => {
       editable.value = !editable.value;
-      console.log("user value", user.value);
       if (editable.value) {
-        for (let k in user.value) {
-          if (user.value[k] !== dbUser.value[k]) isdisabled.value = false;
-        }
+        isdisabled.value = !editable.value
         store.dispatch("addUser", user.value);
       }
     };
+
     const updateUser = async () => {
       const updateUserObj = {
         user: {
@@ -171,7 +168,6 @@ export default {
 
     return {
       user,
-      dbUser,
       editable,
       editProfile,
       updateUser,

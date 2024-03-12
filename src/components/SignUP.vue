@@ -28,11 +28,10 @@
         />
         <label for="female">Female</label>
       </div>
-      <!-- <button type="submit">Sign Up</button> -->
     </form>
-    <!-- <div>
-      go to <span class="text-primary"><router-link to="/">login</router-link></span>
-    </div> -->
+    <div  class="mb-3 fw-bold" v-if="signupCompleted">
+      go to <span class="text-primary log-in" @click="goToLogin">LOGIN</span>
+    </div>
   </div>
 </template>
 
@@ -47,7 +46,7 @@ export default {
    props: {
     signupRef: Boolean,
   },
-  setup(props) {
+  setup(props,{emit}) {
     const store = useStore();
     const email = ref("");
     const password = ref("");
@@ -55,12 +54,17 @@ export default {
     const phone = ref("");
     const address = ref("");
     const selectedGender = ref("male");
+    const signupCompleted = ref(false)
      watch(
       () => props.signupRef,
       (newValue) => {
         if(newValue) signup()
       }
     );
+
+    const goToLogin = () => {
+      emit('showLogin')
+    }
 
     const signup = async () => {
       const data = {
@@ -80,6 +84,8 @@ export default {
       };
       try {
         const result = await callApi("/signup", "POST", requestOptions);
+        console.log('result', result)
+        if(result.userData) signupCompleted.value = true
         result.errorMsg ?  showToastMessage(result.errorMsg, 'error', store) :  showToastMessage(result.msg, 'success', store);
       } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
@@ -93,6 +99,8 @@ export default {
       signup,
       address,
       selectedGender,
+      signupCompleted,
+      goToLogin
     };
   },
 };
@@ -120,6 +128,10 @@ button {
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
+}
+.log-in{
+  cursor:pointer;
+  text-decoration: underline;
 }
 
 </style>

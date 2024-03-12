@@ -1,7 +1,6 @@
 
 import { createRouter, createWebHistory } from 'vue-router';
 import Dashboard from './components/Dashboard.vue';
-import Login from './components/Login.vue';
 import SignUP from './components/SignUP.vue';
 import Event from './components/Event.vue';
 import InitiateEvent from './pages/InitiateEvent.vue';
@@ -10,7 +9,6 @@ import Profile from './components/Profile.vue';
 import PersonalActivity from './components/PersonalActivity.vue';
 import ProfilePage from './pages/ProfilePage.vue';
 const routes = [
-  { path: '/', component: Login },
   { path: '/dashboard', 
     component: Dashboard,
     children:[

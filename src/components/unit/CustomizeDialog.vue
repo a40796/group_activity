@@ -10,9 +10,9 @@
       <div class="dialog-content">
         <slot name="content"></slot>
       </div>
-      <div class="button-area mt-1 mb-1">
+      <div class="button-area mt-1 mb-1" v-if="showButton">
         <button type="button" class="btn-style" @click="closeDialog">Cancel</button>
-        <button type="button" class="btn-style ms-3" @click="clickOk">
+        <button type="button" class="btn-style ms-3" @click="clickOk" >
           {{ customizeOk ?? customizeOk }}
         </button>
       </div>
@@ -37,6 +37,10 @@ export default {
     },
     signupRef:{
       type:Boolean
+    },
+    showButton:{
+      type:Boolean,
+      default:true
     }
   },
   emits: ["close", "ok"],

@@ -1,7 +1,7 @@
 <template>
   <div class="login">
-    <div class="login-box white-bg">
-      <h2>Login</h2>
+    <div class="login-box">
+      <h2 class="text-primary">Login</h2>
       <form @submit.prevent="login">
         <div class="white-bg mb-3">
           <input type="text" v-model="email" placeholder="Email" required />
@@ -20,6 +20,7 @@
           />
         </div>
         <button type="submit">Login</button>
+        <div class="text-danger mt-3" v-if="signupHint">No account, please sign up first</div>
       </form>
       <div>
       </div>
@@ -40,6 +41,7 @@ export default {
     const router = useRouter();
     const store = useStore();
     const showPassword = ref(false);
+    const signupHint = ref(false)
 
     const login = async () => {
       try {
@@ -48,6 +50,10 @@ export default {
           password: password.value,
         };
         const user = await loginUser(data);
+        if(!user){
+          signupHint.value = true
+          return 
+        }
         store.dispatch("addUser", user);
         router.push("/dashboard/event");
       } catch (error) {
@@ -80,6 +86,7 @@ export default {
       login,
       showPassword,
       togglePasswordVisibility,
+      signupHint
     };
   },
 };
@@ -112,6 +119,8 @@ form {
 
 form input {
   border: none;
+  font-size:14px;
+  width:250px;
 }
 
 input {

@@ -5,16 +5,12 @@ export default createStore({
   state: {
     count: 0,
     user:{},
-    dbUser:{},
     msg:{
       error:'',
       success:''
     }
   },
   mutations: {
-    dbUser(state,data){
-      state.dbUser = data;
-    },
     setUser(state,data){
       state.user = data;
     },
