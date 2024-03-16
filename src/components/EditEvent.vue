@@ -10,7 +10,7 @@
     </div>
     <div class="d-flex box-container">
       <div>
-        <h5 class="text-primary">event setting</h5>
+        <h5 class="text-primary">Event setting</h5>
         <InputField
           label="Event Name"
           type="text"

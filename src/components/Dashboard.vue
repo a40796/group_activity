@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-sm bg-light" v-if="store.state.user">
+  <nav class="navbar navbar-expand-sm bg-light" v-if="store.state.user && store.state.user.name">
     <div class="container-fluid">
       <ul class="navbar-nav">
         <li class="nav-item fw-bolder">
@@ -107,7 +107,8 @@ export default {
     const logout = async () => {
       const res = await callApi("/logout");
       if (res) {
-        delete store.state.user
+        router.push("/dashboard/event");
+        store.dispatch('addUser',{})
       }
     };
 

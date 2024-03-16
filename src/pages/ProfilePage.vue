@@ -27,7 +27,7 @@ export default {
   setup() {
     const store = useStore();
     const user = computed(() => store.state.user);
-    const userUrl = computed(() => store.state.user.photoUrl);
+    const userUrl = computed(() => store.state.user.photo);
     const showUserShortName = computed(() => {
       return !userUrl.value || userUrl.value.length === 0;
     });

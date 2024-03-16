@@ -29,10 +29,10 @@
             title="Event Time"
           />
           <span class="ms-3"
-            >{{ parseEventTimePeriod(event.startTime, event.endTime) }}
+            >{{ parseEventTimePeriod(event.meetingTime, event.endTime) }}
           </span>
         </div>
-        <div class="d-flex mt-1">
+        <div class="d-flex mt-1 mb-3">
           <font-awesome-icon
             icon="fa-user"
             class="text-secondary"
@@ -59,6 +59,9 @@
             }}
           </div>
         </div>
+        <span class="status" :class="getStatus(event).styles">{{
+          getStatus(event).text
+        }}</span>
       </div>
       <div class="event-buttons">
         <button type="button" class="btn btn-light" @click="showEventDetail(event)">
@@ -101,9 +104,7 @@
         dialogEvent ? dialogEvent.eventName : ''
       }</span>`"
     >
-      <template #content>
-        
-      </template>
+      <template #content> </template>
     </CustomizeDialog>
   </div>
   <PopupWindow v-if="isPopupVisible" @hidePopupWindow="isPopupVisible = false">
@@ -197,7 +198,7 @@ export default {
         width: "10%",
         isKey: true,
         display: function (row) {
-          return `<image style="width:100px;height:100px" src="${row.image}">`;
+          return `<image style="width:100px;height:100px" src="${row.image}" loading="lazy">`;
         },
       },
       {
@@ -298,7 +299,7 @@ export default {
       images,
       location,
       selectNum,
-      startTime,
+      meetingTime,
       uuid,
     }) => {
       isPopupVisible.value = true;
@@ -308,13 +309,40 @@ export default {
       detailEvent.images = images;
       detailEvent.location = location;
       detailEvent.selectNum = selectNum;
-      detailEvent.startTime = startTime;
+      detailEvent.meetingTime = meetingTime;
       detailEvent.uuid = uuid;
     };
 
-    onUnmounted(()=>{
+    const getStatus = (event) => {
+      if (!event.joinUserId) {
+        return {
+          text: "NO SIGN UP",
+          styles: "border border-primary",
+        };
+      } else {
+        const totalJoined = event.joinUserId.reduce((acc, { id }) => acc + id, 0);
+
+        if (totalJoined === parseInt(event.selectNum)) {
+          return {
+            text: "FULL",
+            styles: "border border-danger",
+          };
+        } else {
+          const ratio = totalJoined / parseInt(event.selectNum);
+          const status = ratio >= 0.5 ? "HOT" : "REGISTRATION OPEN";
+          const styles = ratio >= 0.5 ? "border border-warning" : "border border-success";
+
+          return {
+            text: status,
+            styles: styles,
+          };
+        }
+      }
+    };
+
+    onUnmounted(() => {
       clearInterval(getEventTimer)
-    })
+    });
 
     onBeforeMount(() => {
       getEventTimer = setInterval(() => {
@@ -325,8 +353,6 @@ export default {
     onMounted(() => {
       getEventsInit();
     });
-
-
 
     return {
       currentPage,
@@ -348,6 +374,7 @@ export default {
       detailEvent,
       detailColumns,
       detailRows,
+      getStatus,
     };
   },
 };
@@ -366,15 +393,17 @@ export default {
 }
 .event {
   width: 420px;
-  height: 230px;
+  height: 270px;
   margin: 20px 10px;
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }
 
 .event-buttons {
   display: flex;
   justify-content: end;
-  margin-top: 20px;
 }
 
 .event-buttons > .btn {
@@ -459,5 +488,13 @@ export default {
 .detail-popup-container {
   font-size: 16px;
   color: gray;
+}
+
+.status {
+  padding: 5px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 700;
 }
 </style>

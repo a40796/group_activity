@@ -112,7 +112,7 @@ export default {
         width: "10%",
         isKey: true,
         display: function (row) {
-          return `<image style="width:100px;height:100px" src="${row.image}">`;
+          return `<image style="width:100px;height:100px" src="${row.image}" loading="lazy">`;
         },
       },
       {
