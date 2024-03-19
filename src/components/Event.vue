@@ -1,4 +1,13 @@
 <template>
+  <div class="registration-hint text-secondary">
+    <font-awesome-icon icon="fa-solid fa-comments" class="me-3" />
+    <div v-if="store.state.user && store.state.user.name">
+      Users can both initiate events and participate in others' events!
+    </div>
+    <div v-else>
+      After registration, you can either initiate events or join others' events.
+    </div>
+  </div>
   <div class="events-area">
     <div
       class="event white-bg pt-3"
@@ -7,11 +16,6 @@
     >
       <div class="fw-bold d-flex justify-content-between event-title">
         {{ event.eventName }}
-        <font-awesome-icon
-          class="white-bg cursor-pointer fs-6 text-secondary"
-          icon="fa-heart"
-          title="Save"
-        />
       </div>
       <div class="event-info">
         <div class="mt-3">
@@ -42,12 +46,15 @@
             <div
               class="progress"
               :style="{
-                width:
-                  (!event.joinUserId
-                    ? 0
-                    : event.joinUserId.length / parseInt(event.selectNum)) *
-                    100 +
-                  '%',
+                width: !event.joinUserId
+                  ? '0%'
+                  : (event.joinUserId.reduce(
+                      (acc, curr) => acc + Object.values(curr)[0],
+                      0
+                    ) /
+                      parseInt(event.selectNum)) *
+                      100 +
+                    '%',
               }"
             ></div>
           </div>
@@ -76,6 +83,19 @@
           class="btn btn-light ms-1"
           @click="showDialog(event)"
           v-if="store.state.user && store.state.user.uid !== event.userId"
+          :disabled="
+            event.joinUserId &&
+            event.joinUserId.reduce((acc, curr) => (acc += Object.values(curr)[0]), 0) ===
+              parseInt(event.selectNum)
+          "
+          :class="{
+            disabled:
+              event.joinUserId &&
+              event.joinUserId.reduce(
+                (acc, curr) => (acc += Object.values(curr)[0]),
+                0
+              ) === parseInt(event.selectNum),
+          }"
         >
           <font-awesome-icon
             class="fs-6 text-secondary"
@@ -104,7 +124,21 @@
         dialogEvent ? dialogEvent.eventName : ''
       }</span>`"
     >
-      <template #content> </template>
+      <template #content>
+        <div class="check-event-content">
+          <div style="font-size: 16px; margin-bottom: 10px">
+            Please select the number of participants
+          </div>
+          <input
+            class="border border-primary"
+            type="number"
+            v-model="selectedNumber"
+            min="1"
+            :max="dialogEvent.selectNum"
+            style="border-radius: 5px"
+          />
+        </div>
+      </template>
     </CustomizeDialog>
   </div>
   <PopupWindow v-if="isPopupVisible" @hidePopupWindow="isPopupVisible = false">
@@ -179,7 +213,7 @@ export default {
     const router = useRouter();
     const isPopupVisible = ref(false);
     const detailEvent = reactive({});
-    let getEventTimer;
+    // let getEventTimer;
 
     const showDialog = (event) => {
       dialogEvent.value = event;
@@ -231,12 +265,25 @@ export default {
       }, 0);
     };
 
+    const getUserJoinedEvent = (user, allEvents) => {
+      if (!user || user.events.length === 0) {
+        return;
+      }
+      const joinedEvent = user.events.map((val) => {
+        return allEvents.find((item) => Object.keys(val)[0] === item.uuid);
+      });
+
+      const eventUser = { ...user, joinedEvent };
+      store.dispatch("addUser", eventUser);
+    };
+
     /**
      * @function
      * 得到第一頁資料,並計算分頁頁數
      */
     const getEventsInit = async () => {
       const allEventData = await callApi(`/allEvents?page=${currentPage.value}`, "GET");
+      getUserJoinedEvent(store.state.user, allEventData.allEvents);
       allEventsRef.value = allEventData;
     };
 
@@ -257,10 +304,28 @@ export default {
       getEventsByPage(page);
     };
 
+    const isOverLap = (start, end) => {
+      return store.state.user.joinedEvent.some((event) => {
+        return (
+          new Date(end) > new Date(event.meetingTime) &&
+          new Date(event.endTime) > new Date(start)
+        );
+      });
+    };
+
     const joinEvent = async (event) => {
       try {
         const eventObject = JSON.parse(JSON.stringify(event));
         eventObject.joinUserId = { [store.state.user.uid]: selectedNumber.value };
+
+        if (isOverLap(eventObject.meetingTime, eventObject.endTime)) {
+          showToastMessage(
+            "The time of this event overlaps with the time you have previously signed up for.",
+            "error",
+            store
+          );
+          return;
+        }
 
         const requestOptions = {
           headers: {
@@ -320,7 +385,10 @@ export default {
           styles: "border border-primary",
         };
       } else {
-        const totalJoined = event.joinUserId.reduce((acc, { id }) => acc + id, 0);
+        const totalJoined = event.joinUserId.reduce(
+          (acc, curr) => acc + Object.values(curr)[0],
+          0
+        );
 
         if (totalJoined === parseInt(event.selectNum)) {
           return {
@@ -341,13 +409,13 @@ export default {
     };
 
     onUnmounted(() => {
-      clearInterval(getEventTimer)
+      // clearInterval(getEventTimer)
     });
 
     onBeforeMount(() => {
-      getEventTimer = setInterval(() => {
-        getEventsInit();
-      }, 3000);
+      // getEventTimer = setInterval(() => {
+      //   getEventsInit();
+      // }, 3000);
     });
 
     onMounted(() => {
@@ -388,7 +456,7 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  padding: 30px 50px 0 50px;
+  padding: 0 50px 0 50px;
   overflow: auto;
 }
 .event {
@@ -442,7 +510,6 @@ export default {
 }
 
 .pagination-area >>> .active-page {
-  background-color: #3498db;
   border: 1px solid #3498db;
   color: black;
 }
@@ -496,5 +563,13 @@ export default {
   border-radius: 5px;
   font-size: 14px;
   font-weight: 700;
+}
+
+.registration-hint {
+  padding: 30px 90px 10px 90px;
+  display: flex;
+  font-weight: bold;
+  font-size: 16px;
+  align-items: center;
 }
 </style>

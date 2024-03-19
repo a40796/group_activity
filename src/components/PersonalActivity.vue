@@ -1,6 +1,6 @@
 <template>
   <div class="person-activity-area">
-    <h5 class="attended-events-title text-primary">Attended Events</h5>
+    <h5 class="attended-events-title text-primary">Attend Events</h5>
     <div class="attended-events-table">
       <DataTable :columns="columns" :rows="rows" @open-detail="handleOpenDetail">
       </DataTable>
@@ -32,7 +32,7 @@
           <div>
             <div class="text-primary fw-bold">Event time</div>
             <div>
-              {{ parseEventTimePeriod(detailEvent.startTime, detailEvent.endTime) }}
+              {{ parseEventTimePeriod(detailEvent.meetingTime, detailEvent.endTime) }}
             </div>
           </div>
           <div>
@@ -163,7 +163,7 @@ export default {
         joinUserId,
         location,
         selectNum,
-        startTime,
+        meetingTime,
         userName,
         images,
         uuid,
@@ -173,7 +173,7 @@ export default {
       detailEvent.eventName = eventName;
       detailEvent.joinUserId = joinUserId;
       detailEvent.location = location;
-      detailEvent.startTime = startTime;
+      detailEvent.meetingTime = meetingTime;
       detailEvent.userName = userName;
       detailEvent.selectNum = selectNum;
       detailEvent.images = images;
@@ -194,12 +194,12 @@ export default {
       }
 
       perpageAttendedEvents.value.forEach(
-        ({ announcements, eventName, location, startTime, endTime, uuid }) => {
+        ({ announcements, eventName, location, meetingTime, endTime, uuid }) => {
           rows.value.push({
             eventName,
             announcements,
             location,
-            time: parseEventTimePeriod(startTime, endTime),
+            time: parseEventTimePeriod(meetingTime, endTime),
             uuid,
           });
         }

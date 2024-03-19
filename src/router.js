@@ -9,6 +9,10 @@ import Profile from './components/Profile.vue';
 import PersonalActivity from './components/PersonalActivity.vue';
 import ProfilePage from './pages/ProfilePage.vue';
 const routes = [
+  {
+    path: '/',
+    redirect: '/dashboard/event'
+  },
   { path: '/dashboard', 
     component: Dashboard,
     children:[
