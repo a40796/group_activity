@@ -61,6 +61,9 @@ export default {
            body: formData,
         };
         const data = await callApi('/account/uploadImage','POST',requestOptions);
+        const updateUser = {...store.state.user}
+        updateUser.photo = data.url
+        store.dispatch("addUser", updateUser);
         showToastMessage(data.msg,'success', store)
         cancelEditPhoto();
       } catch (error) {
