@@ -266,7 +266,7 @@ export default {
     };
 
     const getUserJoinedEvent = (user, allEvents) => {
-      if (!user || user.events.length === 0) {
+      if (!user || !user.events) {
         return;
       }
       const joinedEvent = user.events.map((val) => {
@@ -305,12 +305,16 @@ export default {
     };
 
     const isOverLap = (start, end) => {
-      return store.state.user.joinedEvent.some((event) => {
-        return (
-          new Date(end) > new Date(event.meetingTime) &&
-          new Date(event.endTime) > new Date(start)
-        );
-      });
+      if (!store.state.user.joinedEvent) {
+        return false
+      } else {
+        return  store.state.user.joinedEvent.some((event) => {
+          return (
+            new Date(end) > new Date(event.meetingTime) &&
+            new Date(event.endTime) > new Date(start)
+          );
+        });
+      }
     };
 
     const joinEvent = async (event) => {
