@@ -2,11 +2,11 @@
   <div class="login">
     <div class="login-box">
       <h2 class="text-primary">Login</h2>
-      <form @submit.prevent="login">
-        <div class="white-bg mb-3">
+      <form ref="formRef" @submit.prevent="login">
+        <div class="white-bg mb-3 input-field">
           <input type="text" v-model="email" placeholder="Email" required />
         </div>
-        <div class="password-input white-bg mb-3">
+        <div class="password-input white-bg mb-3 input-field">
           <input
             :type="showPassword ? 'text' : 'password'"
             v-model="password"
@@ -14,12 +14,13 @@
             required
           />
           <font-awesome-icon
-            class="ps-3 pe-3 fs-6"
+            class="ps-3 pe-3 fs-6 "
             :icon="showPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']"
             @click="togglePasswordVisibility"
           />
         </div>
         <button type="submit">Login</button>
+        <div class="text-danger mt-3" v-if="validateText.length !== 0" >{{validateText}}</div>
         <div class="text-danger mt-3" v-if="signupHint">No account, please sign up first</div>
       </form>
       <div>
@@ -33,6 +34,8 @@ import { ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { callApi } from "../plugins/apiService.js";
+import { validateInputFnc } from "/src/common.js";
+
 export default {
   name: "LoginForm",
   setup() {
@@ -42,8 +45,15 @@ export default {
     const store = useStore();
     const showPassword = ref(false);
     const signupHint = ref(false)
+    const validateText = ref('')
+    const formRef = ref(null)
 
     const login = async () => {
+      const form = formRef.value;
+      if(validateInputFnc(form)){
+        validateText.value = 'red boxes is required'
+        return 
+      }
       try {
         const data = {
           email: email.value,
@@ -86,7 +96,9 @@ export default {
       login,
       showPassword,
       togglePasswordVisibility,
-      signupHint
+      signupHint,
+      validateText,
+      formRef
     };
   },
 };

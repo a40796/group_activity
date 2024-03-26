@@ -4,31 +4,33 @@
   </div>
   <div class="sign-up">
     <div class="d-flex flex-column">
-      <form class="signup-info" @submit.prevent="signup">
-        <div class="password-input white-bg p-0 mb-3" >
+      <form class="signup-info" ref="formRef" @submit.prevent="signup">
+        <div class="password-input white-bg p-0 mb-3 input-field">
           <input
-              class="white-bg signup-input"
-              type="text"
-              v-model="email"
-              placeholder="Email"
-              required
+            class=" signup-input"
+            type="text"
+            v-model="email"
+            placeholder="Email"
+            required
+            style="border:none"
           />
         </div>
-        <div class="password-input white-bg mb-3 p-0" >
+        <div class="password-input white-bg mb-3 p-0 input-field">
           <input
-            class="white-bg signup-input fs-6"
+            class=" signup-input"
+            style="border:none"
             :type="showPassword ? 'text' : 'password'"
             v-model="password"
             placeholder="Password"
             required
           />
           <font-awesome-icon
-            class="me-3"
+            class="me-3 ms-3"
             :icon="showPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']"
             @click="showPassword = !showPassword"
           />
         </div>
-        
+
         <input
           class="white-bg mb-3 signup-input"
           type="text"
@@ -72,10 +74,10 @@
           <label for="female">Female</label>
         </div>
       </form>
-      
+      <div v-if="validateText.length !== 0" class="d-flex text-danger">*{{validateText}}</div>
     </div>
     <div class="d-flex flex-column align-items-center" style="width: 300px">
-      <div v-if="!personImageUrl" class="person-image">
+    <div v-if="!personImageUrl" class="person-image" :style="{ 'border': uploadedImageHint ? '1px dashed red' : '1px dashed #adb5bd' }">
         <div class="custom-file-input">
           <label for="inputFile" class="file-label">
             <div class="icon">
@@ -98,18 +100,17 @@
       </div>
       <img v-else :src="personImageUrl" class="person-uploaded-image" />
     </div>
-   
   </div>
-   <div class="mb-3  d-flex justify-content-center" v-if="signupCompleted">
-        go to <span class="text-primary log-in ms-2 fw-bold" @click="goToLogin">LOGIN</span>
-      </div>
+  <div class="mb-3 d-flex justify-content-center" v-if="signupCompleted">
+    go to <span class="text-primary log-in ms-2 fw-bold" @click="goToLogin">LOGIN</span>
+  </div>
 </template>
 
 <script>
 import { ref, watch } from "vue";
 import { useStore } from "vuex";
 import { callApi } from "../plugins/apiService.js";
-import { showToastMessage } from "/src/common.js";
+import { showToastMessage, validateInputFnc } from "/src/common.js";
 
 export default {
   name: "SignupForm",
@@ -128,6 +129,9 @@ export default {
     const signupCompleted = ref(false);
     const personImageUrl = ref(null);
     const showPassword = ref(false);
+    const formRef = ref(null)
+    const validateText = ref('')
+    const uploadedImageHint = ref(false)
 
     watch(
       () => props.signupRef,
@@ -141,6 +145,12 @@ export default {
     };
 
     const signup = async () => {
+      const form = formRef.value;
+      if(validateInputFnc(form) || !personImageUrl.value){
+        uploadedImageHint.value = !personImageUrl.value ? true : false;
+        validateText.value = 'Please fill in the red boxes'
+        return 
+      }
       const data = {
         email: email.value,
         password: password.value,
@@ -148,7 +158,7 @@ export default {
         phone: phone.value,
         address: address.value,
         gender: selectedGender.value,
-        photo:personImageUrl.value
+        photo: personImageUrl.value,
       };
       const requestOptions = {
         method: "POST",
@@ -203,7 +213,10 @@ export default {
       handlePersonImage,
       handleImageUpload,
       personImageUrl,
-      showPassword
+      showPassword,
+      formRef,
+      validateText,
+      uploadedImageHint
     };
   },
 };
@@ -242,14 +255,13 @@ button {
   width: 300px;
 }
 
-.signup-info input{
-  background:none;
+.signup-info input {
+  background: none;
 }
 
 .person-image {
   width: 90%;
   height: 100%;
-  border: 1px dashed #adb5bd;
   margin-bottom: 60px;
   display: flex;
   justify-content: center;

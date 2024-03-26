@@ -22,3 +22,22 @@ export function parseEventTimePeriod(startTime, endTime){
     endTime
   ).getDate()}`
 }
+
+export function validateInputFnc(form){
+  form.querySelectorAll("input[required]").forEach((input) => {
+    if (input.parentNode.classList.contains("input-field")) {
+      if(!input.value.trim()){
+        input.parentNode.classList.add("invalid");
+      }
+    } else {
+      if (!input.value.trim()) {
+        input.classList.add("invalid");
+      } else {
+        input.classList.remove("invalid");
+      }
+    }
+  });
+  if (form.querySelector("input.invalid")) {
+    return true;
+  }
+}
