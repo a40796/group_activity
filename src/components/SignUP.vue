@@ -5,20 +5,30 @@
   <div class="sign-up">
     <div class="d-flex flex-column">
       <form class="signup-info" @submit.prevent="signup">
-        <input
-          class="white-bg mb-3 signup-input"
-          type="text"
-          v-model="email"
-          placeholder="Email"
-          required
-        />
-        <input
-          class="white-bg mb-3 signup-input"
-          type="password"
-          v-model="password"
-          placeholder="Password"
-          required
-        />
+        <div class="password-input white-bg p-0 mb-3" >
+          <input
+              class="white-bg signup-input"
+              type="text"
+              v-model="email"
+              placeholder="Email"
+              required
+          />
+        </div>
+        <div class="password-input white-bg mb-3 p-0" >
+          <input
+            class="white-bg signup-input fs-6"
+            :type="showPassword ? 'text' : 'password'"
+            v-model="password"
+            placeholder="Password"
+            required
+          />
+          <font-awesome-icon
+            class="me-3"
+            :icon="showPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']"
+            @click="showPassword = !showPassword"
+          />
+        </div>
+        
         <input
           class="white-bg mb-3 signup-input"
           type="text"
@@ -117,6 +127,7 @@ export default {
     const selectedGender = ref("male");
     const signupCompleted = ref(false);
     const personImageUrl = ref(null);
+    const showPassword = ref(false);
 
     watch(
       () => props.signupRef,
@@ -192,6 +203,7 @@ export default {
       handlePersonImage,
       handleImageUpload,
       personImageUrl,
+      showPassword
     };
   },
 };
@@ -210,7 +222,6 @@ export default {
 
 .signup-input {
   width: 100%;
-  margin-bottom: 10px;
   padding: 5px;
 }
 
@@ -231,6 +242,10 @@ button {
   width: 300px;
 }
 
+.signup-info input{
+  background:none;
+}
+
 .person-image {
   width: 90%;
   height: 100%;
@@ -246,5 +261,17 @@ button {
   height: auto;
   max-width: 200px;
   border: 1px dashed #adb5bd;
+}
+
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.password-input input {
+  width: calc(100% - 30px);
+  padding-right: 30px;
 }
 </style>

@@ -14,7 +14,7 @@
             required
           />
           <font-awesome-icon
-            class="ms-1"
+            class="ps-3 pe-3 fs-6"
             :icon="showPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']"
             @click="togglePasswordVisibility"
           />
